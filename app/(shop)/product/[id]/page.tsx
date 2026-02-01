@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+
 import { notFound } from "next/navigation";
 import ProductPrice from "@/components/products/ProductPrice";
 import AddToCartButton from "@/components/cart/CartButton";
@@ -16,6 +18,16 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
+      <div className="mb-4">
+        <Link
+          href="/?restore=1"
+          scroll={false}
+          className="text-sm text-gray-600 hover:text-black"
+        >
+          ← Back to products
+        </Link>
+      </div>
+
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
         <Image
           src={product.image || "https://picsum.photos/900"}
