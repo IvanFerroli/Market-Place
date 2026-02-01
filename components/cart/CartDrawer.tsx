@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback, useEffect, useRef } from "react";
+
 import Drawer from "@/components/ui/Drawer";
 import CartItemRow from "./CartItemRow";
 import CartSummary from "./CartSummary";
@@ -10,6 +12,46 @@ export default function CartDrawer() {
   const ui = useCartUI();
   const cart = useCartSnapshot();
   const { clear } = useCartActions();
+
+  // Guards: evita double-fire (double click / lag / click spam)
+  const clearingRef = useRef(false);
+  const checkoutRef = useRef(false);
+
+  // Reset guards quando abrir o drawer (nova sessão do UI)
+  useEffect(() => {
+    if (!ui.isOpen) return;
+    clearingRef.current = false;
+    checkoutRef.current = false;
+  }, [ui.isOpen]);
+
+  const handleClear = useCallback(() => {
+    if (clearingRef.current) return;
+    clearingRef.current = true;
+
+    try {
+      clear();
+    } finally {
+      // libera no próximo tick (evita dupla ação no mesmo frame)
+      queueMicrotask(() => {
+        clearingRef.current = false;
+      });
+    }
+  }, [clear]);
+
+  const handleCheckoutMock = useCallback(() => {
+    if (checkoutRef.current) return;
+    checkoutRef.current = true;
+
+    try {
+      // placeholder checkout action
+      clear();
+      ui.close();
+    } finally {
+      queueMicrotask(() => {
+        checkoutRef.current = false;
+      });
+    }
+  }, [clear, ui]);
 
   return (
     <Drawer open={ui.isOpen} onClose={ui.close} title="Your cart">
@@ -28,18 +70,14 @@ export default function CartDrawer() {
           <div className="flex gap-2 pt-2">
             <button
               className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
-              onClick={clear}
+              onClick={handleClear}
             >
               Clear
             </button>
 
             <button
               className="ml-auto rounded-lg bg-black px-3 py-2 text-sm text-white hover:opacity-90"
-              onClick={() => {
-                // placeholder checkout action
-                clear();
-                ui.close();
-              }}
+              onClick={handleCheckoutMock}
             >
               Checkout (mock)
             </button>
