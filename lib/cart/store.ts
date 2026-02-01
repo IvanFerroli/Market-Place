@@ -11,6 +11,9 @@ let state: State = { items: [] };
 let listeners = new Set<() => void>();
 let hydrated = false;
 
+// ✅ batching: múltiplas actions no mesmo tick => 1 save + 1 emit
+let commitScheduled = false;
+
 function emit() {
   for (const l of listeners) l();
 }
@@ -24,14 +27,60 @@ function getSnapshot() {
   return state;
 }
 
+function ensureHydrated() {
+  if (!hydrated) {
+    state = loadCart();
+    hydrated = true;
+  }
+}
+
+function scheduleCommit() {
+  if (commitScheduled) return;
+  commitScheduled = true;
+
+  queueMicrotask(() => {
+    commitScheduled = false;
+    saveCart(state);
+    emit();
+  });
+}
+
 function setState(next: State) {
   state = next;
-  saveCart(state);
-  emit();
+  scheduleCommit();
+}
+
+function clampQty(qty: number) {
+  const n = Number(qty);
+  if (!Number.isFinite(n)) return 1;
+  return Math.max(1, Math.floor(n));
+}
+
+/**
+ * ✅ Dedupe key (prepara para variantes sem quebrar o schema agora)
+ * - se Product tiver variantId/sku/slug/etc, entra no key
+ * - caso contrário, usa só product.id
+ */
+function getItemKeyFromProduct(product: Product): string {
+  const p = product as any;
+  const variantKey =
+    p?.variantKey ??
+    p?.variant_id ??
+    p?.variantId ??
+    p?.sku ??
+    p?.slug ??
+    null;
+
+  return variantKey ? `${String(product.id)}::${String(variantKey)}` : String(product.id);
+}
+
+function getItemKeyFromId(productId: string | number): string {
+  return String(productId);
 }
 
 export function useCartStore() {
   useEffect(() => {
+    // init cart persistence once on client
     if (!hydrated) {
       state = loadCart();
       hydrated = true;
@@ -46,37 +95,60 @@ export function useCartSnapshot() {
 
 export function useCartActions() {
   return useMemo(() => {
-    const idEq = (a: number, b: string | number) => String(a) === String(b);
-
     return {
       addItem(product: Product, qty: number) {
-        const existing = state.items.find((it) => idEq(it.product.id, product.id));
+        ensureHydrated();
+
+        const q = clampQty(qty);
+        const key = getItemKeyFromProduct(product);
+
+        const existing = state.items.find((it) => getItemKeyFromProduct(it.product) === key);
         if (!existing) {
-          setState({ items: [...state.items, { product, quantity: qty }] });
+          setState({ items: [...state.items, { product, quantity: q }] });
           return;
         }
+
         setState({
           items: state.items.map((it) =>
-            idEq(it.product.id, product.id) ? { ...it, quantity: it.quantity + qty } : it,
+            getItemKeyFromProduct(it.product) === key
+              ? { ...it, quantity: clampQty(it.quantity + q) }
+              : it,
           ),
         });
       },
 
       setQty(productId: string, qty: number) {
+        ensureHydrated();
+
+        const key = getItemKeyFromId(productId);
+        const n = Number(qty);
+
+        // ✅ qty <= 0 => remove (evita “0 item” bugando UI)
+        if (!Number.isFinite(n) || n <= 0) {
+          setState({ items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key) });
+          return;
+        }
+
+        const q = clampQty(n);
+
         setState({
           items: state.items.map((it) =>
-            idEq(it.product.id, productId) ? { ...it, quantity: qty } : it,
+            getItemKeyFromProduct(it.product) === key ? { ...it, quantity: q } : it,
           ),
         });
       },
 
       removeItem(productId: string) {
+        ensureHydrated();
+
+        const key = getItemKeyFromId(productId);
         setState({
-          items: state.items.filter((it) => !idEq(it.product.id, productId)),
+          items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key),
         });
       },
 
       clear() {
+        ensureHydrated();
         setState({ items: [] });
       },
     };
