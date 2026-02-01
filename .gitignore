@@ -38,3 +38,27 @@ coverage/
 # Misc
 *.tgz
 .cache/
+
+# deps
+node_modules
+
+# next
+.next
+out
+
+# builds
+dist
+build
+
+# env
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+
+# misc
+.DS_Store
+.vscode
+.idea
