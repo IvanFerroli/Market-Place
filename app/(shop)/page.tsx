@@ -1,4 +1,5 @@
 import ProductGrid from "@/components/products/ProductGrid";
+import ProductCarouselSSR from "@/components/products/ProductCarouselSSR";
 import { listProducts } from "@/lib/data/productsStore";
 
 export const metadata = {
@@ -16,7 +17,7 @@ export default async function HomePage() {
           Minimal shop skeleton — you’ll swap components later.
         </p>
       </header>
-
+      <ProductCarouselSSR products={products} title="Featured products" />
       <ProductGrid products={products} />
     </div>
   );
