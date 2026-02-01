@@ -1,13 +1,14 @@
 "use client";
 
 import { useRef } from "react";
-import { useCartUI } from "./CartDrawerProvider";
+import { openCart } from "@/lib/cart/events";
+import { asId } from "@/lib/utils/ids";
+
 import Button from "@/components/ui/Button";
 import type { Product } from "@/lib/domain/Product";
 import { useCartActions } from "@/lib/cart/store";
 
 export default function CartButton({ product }: { product?: Product }) {
-  const ui = useCartUI();
   const { addItem } = useCartActions();
 
   // simple guard against accidental double click
@@ -21,7 +22,7 @@ export default function CartButton({ product }: { product?: Product }) {
           addingRef.current = true;
 
           addItem(product, 1);
-          ui.open();
+          openCart({ source: "add_to_cart_button", productId: asId(product.id) });
 
           window.setTimeout(() => {
             addingRef.current = false;
@@ -34,7 +35,7 @@ export default function CartButton({ product }: { product?: Product }) {
   }
 
   return (
-    <Button variant="ghost" onClick={ui.open}>
+    <Button variant="ghost" onClick={() => openCart({ source: "header" })}>
       Cart
     </Button>
   );

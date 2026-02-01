@@ -13,10 +13,10 @@ import {
 import CartDrawer from "./CartDrawer";
 import { useCartStore } from "@/lib/cart/store";
 
-// Optional: allow opening/closing cart without prop drilling
-export const CART_OPEN_EVENT = "mp:cart:open";
-export const CART_CLOSE_EVENT = "mp:cart:close";
-export const CART_TOGGLE_EVENT = "mp:cart:toggle";
+import { CART_OPEN_EVENT, CART_CLOSE_EVENT, CART_TOGGLE_EVENT } from "@/lib/cart/events";
+
+// Back-compat: se algum lugar já importava esses consts do Provider
+export { CART_OPEN_EVENT, CART_CLOSE_EVENT, CART_TOGGLE_EVENT } from "@/lib/cart/events";
 
 type CartUiCtx = {
   open: () => void;
@@ -36,16 +36,11 @@ export function useCartUI() {
 // debug helper (easy to delete later)
 const dbg = (...args: unknown[]) => {
   const enabled =
-    process.env.NODE_ENV !== "production" &&
-    process.env.NEXT_PUBLIC_CART_DEBUG === "1";
+    process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_CART_DEBUG === "1";
   if (enabled) console.log(...args);
 };
 
-export default function CartDrawerProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function CartDrawerProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
   // init cart persistence once on client
@@ -77,9 +72,9 @@ export default function CartDrawerProvider({
 
   // Global events (optional, but very reusable)
   useEffect(() => {
-    const onOpen = () => open();
-    const onClose = () => close();
-    const onToggle = () => toggle();
+    const onOpen = (_e: Event) => open();
+    const onClose = (_e: Event) => close();
+    const onToggle = (_e: Event) => toggle();
 
     window.addEventListener(CART_OPEN_EVENT, onOpen as EventListener);
     window.addEventListener(CART_CLOSE_EVENT, onClose as EventListener);
