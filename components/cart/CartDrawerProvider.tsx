@@ -1,9 +1,22 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import CartDrawer from "./CartDrawer";
 import { useCartStore } from "@/lib/cart/store";
+
+// Optional: allow opening/closing cart without prop drilling
+export const CART_OPEN_EVENT = "mp:cart:open";
+export const CART_CLOSE_EVENT = "mp:cart:close";
+export const CART_TOGGLE_EVENT = "mp:cart:toggle";
 
 type CartUiCtx = {
   open: () => void;
@@ -20,45 +33,74 @@ export function useCartUI() {
   return v;
 }
 
-export default function CartDrawerProvider({ children }: { children: React.ReactNode }) {
+// debug helper (easy to delete later)
+const dbg = (...args: unknown[]) => {
+  const enabled =
+    process.env.NODE_ENV !== "production" &&
+    process.env.NEXT_PUBLIC_CART_DEBUG === "1";
+  if (enabled) console.log(...args);
+};
+
+export default function CartDrawerProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   // init cart persistence once on client
   useCartStore();
 
-  const value = useMemo<CartUiCtx>(
-    () => ({
-      isOpen,
-      open: () => setIsOpen(true),
-      close: () => setIsOpen(false),
-      toggle: () => setIsOpen((v) => !v),
-    }),
-    [isOpen],
-  );
+  // guards (avoid double open/close spam)
+  const isOpenRef = useRef(false);
 
-  // UX: lock scroll quando drawer aberto (evita página "mexer" atrás)
   useEffect(() => {
-    if (!isOpen) return;
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+  const open = useCallback(() => {
+    if (isOpenRef.current) return;
+    dbg("[CartDrawerProvider] open()");
+    setIsOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    if (!isOpenRef.current) return;
+    dbg("[CartDrawerProvider] close()");
+    setIsOpen(false);
+  }, []);
+
+  const toggle = useCallback(() => {
+    dbg("[CartDrawerProvider] toggle()");
+    setIsOpen((v) => !v);
+  }, []);
+
+  // Global events (optional, but very reusable)
+  useEffect(() => {
+    const onOpen = () => open();
+    const onClose = () => close();
+    const onToggle = () => toggle();
+
+    window.addEventListener(CART_OPEN_EVENT, onOpen as EventListener);
+    window.addEventListener(CART_CLOSE_EVENT, onClose as EventListener);
+    window.addEventListener(CART_TOGGLE_EVENT, onToggle as EventListener);
 
     return () => {
-      document.body.style.overflow = prevOverflow;
+      window.removeEventListener(CART_OPEN_EVENT, onOpen as EventListener);
+      window.removeEventListener(CART_CLOSE_EVENT, onClose as EventListener);
+      window.removeEventListener(CART_TOGGLE_EVENT, onToggle as EventListener);
     };
-  }, [isOpen]);
+  }, [open, close, toggle]);
 
-  // UX: ESC fecha drawer (comportamento de modal padrão)
-  useEffect(() => {
-    if (!isOpen) return;
+  // NOTE:
+  // - no scroll lock here
+  // - no ESC listener here
+  // Drawer.tsx already handles ESC + scroll lock + focus restore
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false);
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isOpen]);
+  const value = useMemo<CartUiCtx>(
+    () => ({ isOpen, open, close, toggle }),
+    [isOpen, open, close, toggle],
+  );
 
   return (
     <Ctx.Provider value={value}>

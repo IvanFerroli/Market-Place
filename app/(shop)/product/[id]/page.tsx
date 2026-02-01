@@ -18,16 +18,6 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
-      <div className="mb-4">
-        <Link
-          href="/?restore=1"
-          scroll={false}
-          className="text-sm text-gray-600 hover:text-black"
-        >
-          ← Back to products
-        </Link>
-      </div>
-
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
         <Image
           src={product.image || "https://picsum.photos/900"}
@@ -40,6 +30,15 @@ export default async function ProductPage({ params }: PageProps) {
       </div>
 
       <div className="space-y-4">
+        <div className="mb-4">
+        <Link
+          href="/?restore=1"
+          scroll={false}
+          className="text-sm text-gray-600 hover:text-black"
+        >
+          ← Back to products
+        </Link>
+      </div>
         <h1 className="text-3xl font-semibold">{product.name}</h1>
         <ProductPrice value={product.price} />
         <p className="text-gray-700">{product.description}</p>
