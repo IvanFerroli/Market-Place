@@ -22,7 +22,7 @@ async function tryReadText(res: Response): Promise<string | undefined> {
 }
 
 export async function httpGet<T>(url: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(url, { ...init, method: "GET", cache: init.cache ?? "no-store" });
+  const res = await fetch(url, { ...init, method: "GET" });
 
   if (!res.ok) {
     const bodyText = await tryReadText(res);
@@ -48,7 +48,7 @@ export async function fetchFirstOkJson<T>(
 
   for (const url of urls) {
     try {
-      const res = await fetch(url, { ...init, cache: init.cache ?? "no-store" });
+      const res = await fetch(url, init);
 
       if (!res.ok) {
         const bodyText = await tryReadText(res);
