@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import ToastProvider from "@/components/ui/ToastProvider";
 import CartToastProvider from "@/components/cart/MiniCartToastProvider";
 import { listProducts } from "@/lib/data/productsStore";
+import SkippyWebchat from "@/components/botpress/SkippyWebchat";
 
 export const metadata: Metadata = {
   title: {
@@ -69,6 +70,7 @@ export default async function RootLayout({
 
             <main className="min-h-[70vh] pt-20">{children}</main>
             <Footer />
+            <SkippyWebchat />
           </CartToastProvider>
         </ToastProvider>
       </body>

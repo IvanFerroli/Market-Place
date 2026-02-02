@@ -399,3 +399,19 @@ body {
   );
   mix-blend-mode: overlay;
 }
+
+/* =========================
+   Botpress Webchat
+   ========================= */
+
+/* Esconde o botão padrão do Botpress (varia por versão) */
+.bpFab,
+.bpw-floating-button,
+.bpw-widget-btn,
+.bpw-chat-bubble,
+#bp-web-widget-container .bpw-floating-button,
+#bp-web-widget-container .bpw-widget-btn,
+#bp-web-widget-container .bpw-chat-bubble,
+[data-testid="bpw-floating-button"] {
+  display: none !important;
+}

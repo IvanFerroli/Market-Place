@@ -77,10 +77,6 @@ export default function ProductFiltersClient({ products }: { products: Product[]
         <div className="text-sm text-gray-600">
           <span className="font-semibold text-black">{filtered.length}</span> results
         </div>
-
-        <span className="rounded-md bg-[color:var(--cp-yellow)] px-2 py-1 text-[10px] font-extrabold tracking-widest text-black">
-          DBG FILTERS
-        </span>
       </div>
 
       {filtered.length === 0 ? (
