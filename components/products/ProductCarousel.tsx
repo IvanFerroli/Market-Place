@@ -141,9 +141,9 @@ export default function ProductCarousel({ products }: { products: Product[] }) {
         aria-label="Previous"
         onClick={() => scrollByDir(-1)}
         disabled={!canLeft}
-        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border bg-[color:var(--cp-yellow)] p-2 shadow-sm transition disabled:opacity-40"
+        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border color-black bg-[color:var(--cp-yellow)] p-2 shadow-sm transition disabled:opacity-40"
       >
-        ‹
+       ←
       </button>
 
       <button
@@ -151,9 +151,9 @@ export default function ProductCarousel({ products }: { products: Product[] }) {
         aria-label="Next"
         onClick={() => scrollByDir(1)}
         disabled={!canRight}
-        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border bg-[color:var(--cp-yellow)] p-2 shadow-sm transition disabled:opacity-40"
+        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full color-black border bg-[color:var(--cp-yellow)] p-2 shadow-sm transition disabled:opacity-40"
       >
-        ›
+         →
       </button>
     </div>
   );

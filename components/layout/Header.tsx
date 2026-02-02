@@ -7,7 +7,6 @@ import Container from "./Container";
 import CartButton from "@/components/cart/CartButton";
 import CartBadge from "@/components/cart/CartBadge";
 import HomeButton from "@/components/cart/HomeButton";
-import HomeBadge from "@/components/cart/HomeBadge";
 import ScrollProgressBar from "./ScrollProgressBar";
 import Image from "next/image";
 
@@ -78,7 +77,6 @@ export default function Header() {
         <nav className="flex items-center gap-3">
           <div className="relative hidden sm:block">
             <HomeButton />
-            <HomeBadge />
           </div>
 
           <div className="relative">

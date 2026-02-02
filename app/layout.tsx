@@ -49,7 +49,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen cp-body sm:pt-[76px]">
+      <body className="min-h-screen cp-body">
         <ToastProvider>
           <CartToastProvider>
             <Header />
