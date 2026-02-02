@@ -40,10 +40,9 @@ export default function HeaderGlass({
           "mx-auto w-full max-w-6xl",
           "rounded-[1.75rem] border transition-all duration-300",
           // base glass (hero feel)
-          "bg-white/10 text-white backdrop-blur-xl border-white/15 shadow-[0_12px_45px_rgba(0,0,0,0.18)]",
+          "cp-headerGlass",
           // after scroll: solid premium
-          scrolled &&
-            "bg-white/90 text-gray-900 border-black/10 shadow-[0_12px_35px_rgba(15,23,42,0.14)]",
+          scrolled && "cp-headerGlassScrolled",
         )}
       >
         {children}

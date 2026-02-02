@@ -97,8 +97,7 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
           <div
             key={t.key}
             data-mp-toast-root="1"
-            className="pointer-events-auto w-full max-w-[920px] rounded-2xl border border-[rgba(0,6,14,0.55)] bg-[rgba(0,6,14,0.72)]
- backdrop-blur-xl shadow-2xl"
+            className="pointer-events-auto w-full max-w-[920px] rounded-2xl cp-glass-strong shadow-2xl"
           >
             {t.node}
           </div>
@@ -111,8 +110,7 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
           <div
             key={t.key}
             data-mp-toast-root="1"
-            className="pointer-events-auto rounded-2xl border border-[rgba(0,6,14,0.55)] bg-[rgba(0,6,14,0.72)]
- backdrop-blur-xl shadow-xl"
+            className="pointer-events-auto rounded-2xl cp-glass-strong shadow-xl"
           >
             {t.node}
           </div>

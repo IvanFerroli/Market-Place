@@ -18,8 +18,10 @@
 
   /* accents (CP2077 UI-inspired / SIMPLE) */
   --cp-yellow: #f3e600; /* primary CP yellow */
-  --cp-cyan: #55ead4;   /* UI teal/cyan */
-  --cp-red: #c5003c;    /* UI crimson (danger) */
+  --cp-accent: var(--cp-yellow);
+
+  --cp-cyan: #55ead4; /* UI teal/cyan */
+  --cp-red: #c5003c; /* UI crimson (danger) */
   --cp-red-dim: #880425;
 
   /* optional (use sparingly) */
@@ -43,8 +45,7 @@
   /* shadows / glow (menos “luxury”, mais CP yellow/cyan) */
   --cp-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
   --cp-glow:
-    0 0 0 1px rgba(243, 230, 0, 0.10),
-    0 0 26px rgba(85, 234, 212, 0.14),
+    0 0 0 1px rgba(243, 230, 0, 0.1), 0 0 26px rgba(85, 234, 212, 0.14),
     0 0 42px rgba(197, 0, 60, 0.08);
 }
 
@@ -170,7 +171,7 @@ body {
   color: var(--cp-yellow);
   text-shadow:
     0 0 14px rgba(243, 230, 0, 0.22),
-    0 0 26px rgba(243, 230, 0, 0.10);
+    0 0 26px rgba(243, 230, 0, 0.1);
 }
 
 .cp-navlink {
@@ -221,7 +222,7 @@ body {
   background: rgba(243, 230, 0, 0.12);
   box-shadow:
     0 0 0 1px rgba(243, 230, 0, 0.14),
-    0 0 26px rgba(243, 230, 0, 0.10),
+    0 0 26px rgba(243, 230, 0, 0.1),
     0 20px 60px rgba(0, 0, 0, 0.55);
 }
 
@@ -229,7 +230,7 @@ body {
   box-shadow:
     0 0 0 1px rgba(85, 234, 212, 0.18),
     0 0 26px rgba(85, 234, 212, 0.16),
-    0 0 22px rgba(197, 0, 60, 0.10),
+    0 0 22px rgba(197, 0, 60, 0.1),
     0 20px 60px rgba(0, 0, 0, 0.55);
 }
 
@@ -270,7 +271,7 @@ body {
   height: 4px;
   width: 0%;
   background: var(--cp-yellow);
-  box-shadow: 0 0 18px rgba(243, 230, 0, 0.20);
+  box-shadow: 0 0 18px rgba(243, 230, 0, 0.2);
   transition: width 140ms ease;
 }
 
@@ -339,7 +340,7 @@ body {
   pointer-events: none;
   background: var(--cp-yellow);
   opacity: 0.85;
-  box-shadow: 0 0 14px rgba(243, 230, 0, 0.20);
+  box-shadow: 0 0 14px rgba(243, 230, 0, 0.2);
 }
 
 .cp-card:hover {
@@ -351,6 +352,23 @@ body {
 /* image overlay / scanlines */
 .cp-media {
   position: relative;
+}
+
+/* header glass presets (F4 tokenized) */
+.cp-headerGlass {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.18);
+}
+
+.cp-headerGlassScrolled {
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(17, 24, 39, 1); /* perto do gray-900 */
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.14);
 }
 
 .cp-media::after {
