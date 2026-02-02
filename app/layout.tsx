@@ -2,7 +2,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ToastProvider from "@/components/ui/ToastProvider";
-import CartToastProvider from "@/components/cart/CartToastProvider";
+import CartToastProvider from "@/components/cart/MiniCartToastProvider";
 
 export const metadata = {
   title: "Market Place",
@@ -13,8 +13,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-white text-gray-900 pt-[76px]">
+    <html lang="en" className="dark">
+      <body className="min-h-screen cp-body pt-[76px]">
         <ToastProvider>
           <CartToastProvider>
             <Header />

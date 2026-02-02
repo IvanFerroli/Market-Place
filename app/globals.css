@@ -2,17 +2,382 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================
+   CYBERPUNK GLASS THEME
+   ========================= */
+
 :root {
-  color-scheme: light;
+  color-scheme: dark;
+
+  /* base (CP2077 title-card vibe) */
+  --cp-bg: #00060e;
+  --cp-bg2: #070812;
+
+  --cp-text: rgba(255, 255, 255, 0.92);
+  --cp-muted: rgba(255, 255, 255, 0.68);
+
+  /* accents (CP2077 UI-inspired / SIMPLE) */
+  --cp-yellow: #f3e600; /* primary CP yellow */
+  --cp-cyan: #55ead4;   /* UI teal/cyan */
+  --cp-red: #c5003c;    /* UI crimson (danger) */
+  --cp-red-dim: #880425;
+
+  /* optional (use sparingly) */
+  --cp-magenta: #ff2bd6;
+
+  /* extras (keep if you already reference these elsewhere) */
+  --cp-blue: #54c1e6; /* cold cyan/blue */
+  --cp-teal: #39c4b6; /* teal */
+  --cp-acid: #9a9f17; /* olive/acid detail */
+  --cp-lime: var(--cp-acid);
+
+  /* compat aliases (se algo no app usa --cp-pink antigo) */
+  --cp-pink: var(--cp-red);
+  --cp-pink-dim: var(--cp-red-dim);
+
+  /* glass (DARK tint) — mais opaco pra não “vazar” fundo claro */
+  --cp-glass: rgba(0, 6, 14, 0.72);
+  --cp-glass-strong: rgba(0, 6, 14, 0.86);
+  --cp-border: rgba(255, 255, 255, 0.14);
+
+  /* shadows / glow (menos “luxury”, mais CP yellow/cyan) */
+  --cp-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  --cp-glow:
+    0 0 0 1px rgba(243, 230, 0, 0.10),
+    0 0 26px rgba(85, 234, 212, 0.14),
+    0 0 42px rgba(197, 0, 60, 0.08);
 }
 
 html,
 body {
   height: 100%;
+  /* fallback pra não vazar cinza/branco atrás do glass/toasts */
+  background: linear-gradient(180deg, var(--cp-bg), var(--cp-bg2));
 }
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
-    "Apple Color Emoji", "Segoe UI Emoji";
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+/* background “night city” vibe: neon haze + subtle grid */
+.cp-body {
+  color: var(--cp-text);
+  position: relative;
+  min-height: 100svh;
+  width: 100%;
+
+  /* importante: mantém transparente pra não criar “blocos” */
+  background: transparent;
+
+  /* cria um stacking context pra z-index negativo funcionar */
+  isolation: isolate;
+  z-index: 0;
+}
+
+/* background único e contínuo (ponta a ponta) */
+.cp-body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -2;
+
+  background:
+    radial-gradient(1100px 680px at 18% 12%, rgba(243, 230, 0, 0.14), transparent 60%),
+    radial-gradient(900px 620px at 86% 22%, rgba(85, 234, 212, 0.14), transparent 58%),
+    radial-gradient(760px 520px at 72% 88%, rgba(197, 0, 60, 0.08), transparent 62%),
+    linear-gradient(180deg, var(--cp-bg), var(--cp-bg2));
+
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* grid overlay (bem sutil) */
+.cp-body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+
+  opacity: 0.22;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 28px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035) 0px,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px,
+      transparent 28px
+    );
+  mix-blend-mode: overlay;
+}
+
+/* =========================
+   Reusable “glassy” building blocks
+   ========================= */
+
+.cp-glass {
+  background: var(--cp-glass);
+  border: 1px solid var(--cp-border);
+  box-shadow: var(--cp-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.cp-glass-strong {
+  background: var(--cp-glass-strong);
+  border: 1px solid var(--cp-border);
+  box-shadow: var(--cp-shadow), var(--cp-glow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.cp-pill {
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+/* topline (amarelo sólido reutilizável: toast/header/cards extras) */
+.cp-topline {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--cp-yellow);
+  box-shadow: 0 0 16px rgba(243, 230, 0, 0.18);
+}
+
+.cp-brand {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--cp-yellow);
+  text-shadow:
+    0 0 14px rgba(243, 230, 0, 0.22),
+    0 0 26px rgba(243, 230, 0, 0.10);
+}
+
+.cp-navlink {
+  color: var(--cp-muted);
+  transition:
+    color 160ms ease,
+    text-shadow 160ms ease;
+}
+.cp-navlink:hover {
+  color: var(--cp-text);
+  text-shadow: 0 0 14px rgba(85, 234, 212, 0.18);
+}
+
+/* =========================
+   Buttons (theme-ready)
+   ========================= */
+
+.cp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--cp-text);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.cp-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 45px rgba(0, 0, 0, 0.38);
+}
+.cp-btn:active {
+  transform: translateY(0px);
+}
+
+.cp-btn-primary {
+  border-color: rgba(243, 230, 0, 0.28);
+  background: rgba(243, 230, 0, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(243, 230, 0, 0.14),
+    0 0 26px rgba(243, 230, 0, 0.10),
+    0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.cp-btn-primary:hover {
+  box-shadow:
+    0 0 0 1px rgba(85, 234, 212, 0.18),
+    0 0 26px rgba(85, 234, 212, 0.16),
+    0 0 22px rgba(197, 0, 60, 0.10),
+    0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.cp-btn-ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.cp-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* danger (Close/Clear) — vermelho CP escurecido */
+.cp-btn-danger {
+  border-color: rgba(197, 0, 60, 0.32);
+  background: rgba(197, 0, 60, 0.14);
+  box-shadow:
+    0 0 0 1px rgba(197, 0, 60, 0.12),
+    0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.cp-btn-danger:hover {
+  border-color: rgba(197, 0, 60, 0.44);
+  box-shadow:
+    0 0 0 1px rgba(197, 0, 60, 0.18),
+    0 0 22px rgba(197, 0, 60, 0.14),
+    0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+/* =========================
+   Header progressbar
+   ========================= */
+.cp-progressTrack {
+  height: 4px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+}
+.cp-progressBar {
+  height: 4px;
+  width: 0%;
+  background: var(--cp-yellow);
+  box-shadow: 0 0 18px rgba(243, 230, 0, 0.20);
+  transition: width 140ms ease;
+}
+
+/* =========================
+   Footer
+   ========================= */
+.cp-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* =========================
+   Typography helpers
+   ========================= */
+.cp-text {
+  color: var(--cp-text) !important;
+}
+.cp-muted {
+  color: var(--cp-muted) !important;
+}
+.cp-dim {
+  color: rgba(255, 255, 255, 0.52) !important;
+}
+
+.cp-kicker {
+  color: rgba(243, 230, 0, 0.86) !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.cp-price {
+  color: var(--cp-yellow) !important;
+  text-shadow: 0 0 16px rgba(243, 230, 0, 0.14);
+  font-weight: 800;
+}
+
+/* =========================
+   Cyberpunk cards (ProductCard base)
+   ========================= */
+.cp-card {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--cp-glass);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: var(--cp-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.cp-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  background: var(--cp-yellow);
+  opacity: 0.85;
+  box-shadow: 0 0 14px rgba(243, 230, 0, 0.20);
+}
+
+.cp-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(243, 230, 0, 0.22);
+  box-shadow: var(--cp-shadow), var(--cp-glow);
+}
+
+/* image overlay / scanlines */
+.cp-media {
+  position: relative;
+}
+
+.cp-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(7, 8, 18, 0.72),
+    rgba(7, 8, 18, 0.1) 55%,
+    rgba(7, 8, 18, 0)
+  );
+}
+
+.cp-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.18;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.06) 0px,
+    rgba(255, 255, 255, 0.06) 1px,
+    transparent 1px,
+    transparent 6px
+  );
+  mix-blend-mode: overlay;
 }

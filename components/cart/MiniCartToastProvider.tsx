@@ -26,7 +26,7 @@ import {
   type ToastOpenPayload,
 } from "@/lib/toast/events";
 
-import CartToast from "./CartToast";
+import MiniCartToast from "./MiniCartToast";
 
 // Back-compat: se algum lugar já importava esses consts do Provider
 export { CART_OPEN_EVENT, CART_CLOSE_EVENT, CART_TOGGLE_EVENT } from "@/lib/cart/events";
@@ -42,13 +42,17 @@ const Ctx = createContext<CartUiCtx | null>(null);
 
 export function useCartUI() {
   const v = useContext(Ctx);
-  if (!v) throw new Error("useCartUI must be used within CartDrawerProvider");
+  if (!v) throw new Error("useCartUI must be used within MiniCartToastProvider");
   return v;
 }
 
 const TOAST_KEY = "cart";
 
-export default function CartDrawerProvider({ children }: { children: React.ReactNode }) {
+export default function MiniCartToastProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // init cart persistence once on client
   useCartStore();
 
@@ -85,7 +89,7 @@ export default function CartDrawerProvider({ children }: { children: React.React
     openToast({
       key: TOAST_KEY,
       placement: "bottom-right",
-      node: <CartToast productId={productId || undefined} />,
+      node: <MiniCartToast productId={productId || undefined} />,
     });
     setIsOpen(true);
   }, []);

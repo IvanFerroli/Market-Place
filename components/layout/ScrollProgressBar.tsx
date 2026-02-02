@@ -38,11 +38,8 @@ export default function ScrollProgressBar() {
   }, []);
 
   return (
-    <div aria-hidden className="h-1 w-full">
-      <div
-        className="h-1 bg-black/80 transition-[width] duration-150"
-        style={{ width: `${progress}%` }}
-      />
+    <div aria-hidden className="cp-progressTrack">
+      <div className="cp-progressBar" style={{ width: `${progress}%` }} />
     </div>
   );
 }

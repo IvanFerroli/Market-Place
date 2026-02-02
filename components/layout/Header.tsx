@@ -39,19 +39,17 @@ export default function Header() {
         className={[
           "mx-auto w-full max-w-6xl overflow-hidden",
           "rounded-[9999px] border transition-all duration-300",
-          "backdrop-blur-xl",
-          scrolled
-            ? "bg-white/90 text-gray-900 shadow-sm border-gray-200/80"
-            : "bg-white/60 text-gray-900 shadow-[0_12px_35px_rgba(15,23,42,0.10)] border-white/60",
+          "cp-pill",
+          scrolled ? "cp-glass-strong" : "cp-glass",
         ].join(" ")}
       >
         <Container className="flex h-14 items-center justify-between">
-          <Link href="/" className="font-semibold tracking-tight">
+          <Link href="/" className="cp-brand">
             Market Place
           </Link>
 
           <nav className="flex items-center gap-3">
-            <Link href="/" className="text-sm text-gray-700 hover:text-black">
+            <Link href="/" className="text-sm cp-navlink">
               Home
             </Link>
 

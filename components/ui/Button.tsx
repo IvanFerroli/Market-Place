@@ -23,10 +23,13 @@ export default function Button({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed",
+        // base (global)
+        "cp-btn disabled:opacity-50 disabled:cursor-not-allowed",
 
-        variant === "solid" && "bg-black text-white hover:opacity-90",
-        variant === "ghost" && "border bg-white hover:bg-gray-50",
+        // variants
+        variant === "solid" && "cp-btn-primary",
+        variant === "ghost" && "cp-btn-ghost",
+
         className,
       )}
     >

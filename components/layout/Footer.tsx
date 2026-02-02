@@ -2,9 +2,11 @@ import Container from "./Container";
 
 export default function Footer() {
   return (
-    <footer className="mt-14 border-t bg-white">
-      <Container className="py-10 text-sm text-gray-600">
-        <p>© {new Date().getFullYear()} Market Place — MVP skeleton.</p>
+    <footer className="mt-14 cp-footer">
+      <Container className="py-10 text-sm">
+        <p className="text-white/70">
+          © {new Date().getFullYear()} Market Place — Night City edition.
+        </p>
       </Container>
     </footer>
   );

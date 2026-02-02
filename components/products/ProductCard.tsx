@@ -1,22 +1,33 @@
 import ProductImage from "./ProductImage";
-import ProductPrice from "./ProductPrice";
 import type { Product } from "@/lib/domain/Product";
 import Badge from "@/components/ui/Badge";
 import CartButton from "@/components/cart/CartButton";
-
-import ProductQuickViewTrigger from "@/components/products/ProductQuickViewTrigger";
+import ProductQuickViewToastTrigger from "@/components/products/ProductQuickViewToastTrigger";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
-    <div className="group overflow-hidden rounded-2xl border bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <div className="cp-card group">
       {/* clickable area */}
-      <ProductQuickViewTrigger product={product}>
-        <ProductImage product={product} />
+      <ProductQuickViewToastTrigger product={product}>
+        <div className="cp-media">
+          <ProductImage product={product} />
+        </div>
 
         <div className="space-y-2 p-4">
           <div className="flex items-start justify-between gap-3">
-            <h3 className="font-medium group-hover:underline">{product.name}</h3>
-            <ProductPrice value={product.price} compact />
+            <div className="min-w-0">
+              <div className="cp-kicker">Cyberware</div>
+              <h3 className="cp-text mt-1 font-semibold leading-tight truncate group-hover:underline">
+                {product.name}
+              </h3>
+            </div>
+
+            <div className="shrink-0 text-right">
+              <div className="cp-price text-sm">
+                R${product.price.toFixed(2)}
+              </div>
+              <div className="cp-dim text-[11px] mt-0.5">in stock</div>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -24,13 +35,18 @@ export default function ProductCard({ product }: { product: Product }) {
             <Badge>Stock: {product.stock}</Badge>
           </div>
 
-          <p className="line-clamp-2 text-sm text-gray-600">{product.description}</p>
+          <p className="cp-muted line-clamp-2 text-sm leading-relaxed">
+            {product.description}
+          </p>
         </div>
-      </ProductQuickViewTrigger>
+      </ProductQuickViewToastTrigger>
 
-      {/* CTA (not inside Link) */}
-      <div className="px-4 pb-4">
+      {/* CTA */}
+      <div className="px-4 pb-4 pt-2 border-t border-white/10">
         <CartButton product={product} />
+        <div className="cp-dim mt-2 text-[11px]">
+          Quick view pelo card — checkout fica no toast.
+        </div>
       </div>
     </div>
   );
