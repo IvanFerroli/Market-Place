@@ -10,16 +10,29 @@ import {
   useState,
 } from "react";
 
-import CartDrawer from "./CartDrawer";
 import { useCartStore } from "@/lib/cart/store";
+import {
+  CART_OPEN_EVENT,
+  CART_CLOSE_EVENT,
+  CART_TOGGLE_EVENT,
+  type OpenCartPayload,
+} from "@/lib/cart/events";
 
-import { CART_OPEN_EVENT, CART_CLOSE_EVENT, CART_TOGGLE_EVENT } from "@/lib/cart/events";
+import {
+  openToast,
+  closeToast,
+  TOAST_OPEN_EVENT,
+  TOAST_CLOSE_EVENT,
+  type ToastOpenPayload,
+} from "@/lib/toast/events";
+
+import CartToast from "./CartToast";
 
 // Back-compat: se algum lugar já importava esses consts do Provider
 export { CART_OPEN_EVENT, CART_CLOSE_EVENT, CART_TOGGLE_EVENT } from "@/lib/cart/events";
 
 type CartUiCtx = {
-  open: () => void;
+  open: (p?: OpenCartPayload) => void;
   close: () => void;
   toggle: () => void;
   isOpen: boolean;
@@ -33,46 +46,66 @@ export function useCartUI() {
   return v;
 }
 
-// debug helper (easy to delete later)
-const dbg = (...args: unknown[]) => {
-  const enabled =
-    process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_CART_DEBUG === "1";
-  if (enabled) console.log(...args);
-};
+const TOAST_KEY = "cart";
 
 export default function CartDrawerProvider({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-
   // init cart persistence once on client
   useCartStore();
 
-  // guards (avoid double open/close spam)
+  const [isOpen, setIsOpen] = useState(false);
   const isOpenRef = useRef(false);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
-  const open = useCallback(() => {
-    if (isOpenRef.current) return;
-    dbg("[CartDrawerProvider] open()");
+  useEffect(() => {
+    const onToastOpen = (e: Event) => {
+      const ce = e as CustomEvent<ToastOpenPayload>;
+      if (ce.detail?.key === TOAST_KEY) setIsOpen(true);
+    };
+
+    const onToastClose = (e: Event) => {
+      const ce = e as CustomEvent<{ key?: string }>;
+      const k = String((ce as any).detail?.key ?? "");
+      if (k === TOAST_KEY) setIsOpen(false);
+    };
+
+    window.addEventListener(TOAST_OPEN_EVENT, onToastOpen as EventListener);
+    window.addEventListener(TOAST_CLOSE_EVENT, onToastClose as EventListener);
+
+    return () => {
+      window.removeEventListener(TOAST_OPEN_EVENT, onToastOpen as EventListener);
+      window.removeEventListener(TOAST_CLOSE_EVENT, onToastClose as EventListener);
+    };
+  }, []);
+
+  const open = useCallback((payload?: OpenCartPayload) => {
+    const productId = String(payload?.productId ?? "").trim();
+    openToast({
+      key: TOAST_KEY,
+      placement: "bottom-right",
+      node: <CartToast productId={productId || undefined} />,
+    });
     setIsOpen(true);
   }, []);
 
   const close = useCallback(() => {
-    if (!isOpenRef.current) return;
-    dbg("[CartDrawerProvider] close()");
+    closeToast(TOAST_KEY);
     setIsOpen(false);
   }, []);
 
   const toggle = useCallback(() => {
-    dbg("[CartDrawerProvider] toggle()");
-    setIsOpen((v) => !v);
-  }, []);
+    if (isOpenRef.current) close();
+    else open();
+  }, [close, open]);
 
-  // Global events (optional, but very reusable)
+  // Global events (source of truth)
   useEffect(() => {
-    const onOpen = (_e: Event) => open();
+    const onOpen = (e: Event) => {
+      const ce = e as CustomEvent<OpenCartPayload>;
+      open(ce.detail);
+    };
     const onClose = (_e: Event) => close();
     const onToggle = (_e: Event) => toggle();
 
@@ -87,20 +120,10 @@ export default function CartDrawerProvider({ children }: { children: React.React
     };
   }, [open, close, toggle]);
 
-  // NOTE:
-  // - no scroll lock here
-  // - no ESC listener here
-  // Drawer.tsx already handles ESC + scroll lock + focus restore
-
   const value = useMemo<CartUiCtx>(
     () => ({ isOpen, open, close, toggle }),
     [isOpen, open, close, toggle],
   );
 
-  return (
-    <Ctx.Provider value={value}>
-      {children}
-      <CartDrawer />
-    </Ctx.Provider>
-  );
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

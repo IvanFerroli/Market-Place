@@ -1,19 +1,16 @@
-import Link from "next/link";
 import ProductImage from "./ProductImage";
 import ProductPrice from "./ProductPrice";
 import type { Product } from "@/lib/domain/Product";
 import Badge from "@/components/ui/Badge";
 import CartButton from "@/components/cart/CartButton";
 
+import ProductQuickViewTrigger from "@/components/products/ProductQuickViewTrigger";
+
 export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group overflow-hidden rounded-2xl border bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       {/* clickable area */}
-      <Link
-        href={`/product/${product.id}`}
-        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/10"
-        aria-label={`View ${product.name}`}
-      >
+      <ProductQuickViewTrigger product={product}>
         <ProductImage product={product} />
 
         <div className="space-y-2 p-4">
@@ -29,7 +26,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
           <p className="line-clamp-2 text-sm text-gray-600">{product.description}</p>
         </div>
-      </Link>
+      </ProductQuickViewTrigger>
 
       {/* CTA (not inside Link) */}
       <div className="px-4 pb-4">

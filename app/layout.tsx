@@ -1,7 +1,8 @@
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import CartDrawerProvider from "@/components/cart/CartDrawerProvider";
+import ToastProvider from "@/components/ui/ToastProvider";
+import CartToastProvider from "@/components/cart/CartToastProvider";
 
 export const metadata = {
   title: "Market Place",
@@ -14,11 +15,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-white text-gray-900 pt-[76px]">
-        <CartDrawerProvider>
-          <Header />
-          <main className="min-h-[70vh] pt-20">{children}</main>
-          <Footer />
-        </CartDrawerProvider>
+        <ToastProvider>
+          <CartToastProvider>
+            <Header />
+            <main className="min-h-[70vh] pt-20">{children}</main>
+            <Footer />
+          </CartToastProvider>
+        </ToastProvider>
       </body>
     </html>
   );
