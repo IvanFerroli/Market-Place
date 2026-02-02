@@ -7,10 +7,8 @@ export const revalidate = 300;
 
 const CACHE_CONTROL = "public, max-age=60, s-maxage=300, stale-while-revalidate=600";
 
-type Ctx = { params: Promise<{ id: string }> };
-
-export async function GET(_: Request, ctx: Ctx) {
-  const { id } = await ctx.params;
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+  const id = String(params.id ?? "").trim();
   const product = await getProductById(id);
 
   if (!product) {
