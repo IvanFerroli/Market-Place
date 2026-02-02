@@ -3,6 +3,8 @@ import type { Product } from "@/lib/domain/Product";
 import Badge from "@/components/ui/Badge";
 import CartButton from "@/components/cart/CartButton";
 import ProductQuickViewToastTrigger from "@/components/products/ProductQuickViewToastTrigger";
+import ProductPrice from "@/components/products/ProductPrice";
+
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
@@ -24,7 +26,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
             <div className="shrink-0 text-right">
               <div className="cp-price text-sm">
-                R${product.price.toFixed(2)}
+                <ProductPrice value={product.priceCents} />
               </div>
               <div className="cp-dim text-[11px] mt-0.5">in stock</div>
             </div>

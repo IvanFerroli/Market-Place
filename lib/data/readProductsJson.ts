@@ -7,11 +7,16 @@ let cache: Product[] | null = null;
 function normalize(raw: any): Product {
   if (raw == null) throw new Error("Invalid product: null/undefined");
 
-  const id = Number(raw.id);
-  if (!Number.isFinite(id)) throw new Error("Invalid product.id");
+  const id = String(raw.id ?? "").trim();
+  if (!id) throw new Error("Invalid product.id");
 
   const price = Number(raw.price);
-  if (!Number.isFinite(price)) throw new Error("Invalid product.price");
+  if (!Number.isFinite(price)) throw new Error("Invalid product.price (number)");
+
+  const priceCents = Math.round(price * 100);
+  if (!Number.isFinite(priceCents) || priceCents < 0) {
+    throw new Error("Invalid product.priceCents");
+  }
 
   const stock = Number(raw.stock ?? 0);
   if (!Number.isFinite(stock)) throw new Error("Invalid product.stock");
@@ -19,7 +24,7 @@ function normalize(raw: any): Product {
   return {
     id,
     name: String(raw.name ?? ""),
-    price,
+    priceCents,
     description: String(raw.description ?? ""),
     image: String(raw.image ?? ""),
     category: String(raw.category ?? ""),

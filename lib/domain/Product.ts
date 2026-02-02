@@ -1,7 +1,7 @@
 export type Product = {
-  id: number;
+  id: string; // canonical id (string)
   name: string;
-  price: number; // ex: 79.90
+  priceCents: number; // canonical money (int, in cents)
   description: string;
   image: string;
   category: string;

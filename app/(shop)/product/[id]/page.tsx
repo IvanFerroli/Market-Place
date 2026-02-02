@@ -31,16 +31,16 @@ export default async function ProductPage({ params }: PageProps) {
 
       <div className="space-y-4">
         <div className="mb-4">
-        <Link
-          href="/?restore=1"
-          scroll={false}
-          className="text-sm text-gray-600 hover:text-black"
-        >
-          ← Back to products
-        </Link>
-      </div>
+          <Link
+            href="/?restore=1"
+            scroll={false}
+            className="text-sm text-gray-600 hover:text-black"
+          >
+            ← Back to products
+          </Link>
+        </div>
         <h1 className="text-3xl font-semibold">{product.name}</h1>
-        <ProductPrice value={product.price} />
+        <ProductPrice value={product.priceCents} />
         <p className="text-gray-700">{product.description}</p>
 
         <div className="text-sm text-gray-600">

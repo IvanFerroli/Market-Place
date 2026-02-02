@@ -9,6 +9,7 @@ import CartQuantityStepper from "@/components/cart/CartQuantityStepper";
 import { useCartSnapshot } from "@/lib/cart/store";
 import { closeToast } from "@/lib/toast/events";
 import { useMemo, useState } from "react";
+import ProductPrice from "@/components/products/ProductPrice";
 
 export default function ProductQuickViewToast({ product }: { product: Product }) {
   const [justAdded, setJustAdded] = useState(false);
@@ -58,7 +59,7 @@ export default function ProductQuickViewToast({ product }: { product: Product })
 
         <div className="p-5">
           <div className="text-2xl font-semibold text-white">
-            ${product.price.toFixed(2)}
+            <ProductPrice value={product.priceCents} />
           </div>
 
           <p className="mt-2 text-sm text-white/70 leading-relaxed">

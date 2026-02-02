@@ -13,12 +13,15 @@ export default function CartItemRow({ item }: { item: CartItem }) {
       <div className="min-w-0">
         <div className="truncate font-medium">{item.product.name}</div>
         <div className="mt-1 text-sm text-gray-600">
-          <ProductPrice value={item.product.price} compact />
+          <ProductPrice value={item.product.priceCents} compact />
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <CartQuantityStepper productId={String(item.product.id)} quantity={item.quantity} />
+        <CartQuantityStepper
+          productId={String(item.product.id)}
+          quantity={item.quantity}
+        />
         <button
           className="rounded-lg border px-2 py-1 text-xs hover:bg-gray-50"
           onClick={() => removeItem(String(item.product.id))}
