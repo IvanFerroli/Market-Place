@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getProductById } from "@/lib/data/productsStore";
 
+export const runtime = "nodejs";
+
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_: Request, ctx: Ctx) {

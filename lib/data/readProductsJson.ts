@@ -35,8 +35,29 @@ function normalize(raw: any): Product {
 export async function readProductsJson(): Promise<Product[]> {
   if (cache) return cache;
 
-  const filePath = path.join(process.cwd(), "public", "data", "products.json");
-  const raw = await readFile(filePath, "utf-8");
+  const candidates = [
+    path.join(process.cwd(), "products.json"), // desafio (raiz)
+    path.join(process.cwd(), "public", "data", "products.json"), // fallback (teu repo atual)
+  ];
+
+  let raw: string | null = null;
+  let lastErr: unknown = null;
+
+  for (const p of candidates) {
+    try {
+      raw = await readFile(p, "utf-8");
+      break;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+
+  if (raw == null) {
+    throw new Error(
+      `Unable to read products.json. Tried: ${candidates.join(", ")}. Last error: ${String(lastErr)}`,
+    );
+  }
+
   const data = JSON.parse(raw);
 
   if (!Array.isArray(data)) {
