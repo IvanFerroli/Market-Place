@@ -57,24 +57,16 @@ function clampQty(qty: number) {
 }
 
 /**
- * ✅ Dedupe key (prepara para variantes sem quebrar o schema agora)
- * - se Product tiver variantId/sku/slug/etc, entra no key
- * - caso contrário, usa só product.id
+ * ✅ Dedupe key (simples e consistente)
+ * - por enquanto, a key é sempre product.id
+ * - se um dia houver variantes, vamos introduzir um `itemKey` explícito no CartItem
  */
-function getItemKeyFromProduct(product: Product): string {
-  const p = product as any;
-  const variantKey =
-    p?.variantKey ??
-    p?.variant_id ??
-    p?.variantId ??
-    p?.sku ??
-    p?.slug ??
-    null;
 
-  return variantKey ? `${String(product.id)}::${String(variantKey)}` : String(product.id);
+function getItemKeyFromProduct(product: Product): string {
+  return String(product.id);
 }
 
-function getItemKeyFromId(productId: string | number): string {
+function getItemKeyFromId(productId: string): string {
   return String(productId);
 }
 
@@ -102,7 +94,9 @@ export function useCartActions() {
         const q = clampQty(qty);
         const key = getItemKeyFromProduct(product);
 
-        const existing = state.items.find((it) => getItemKeyFromProduct(it.product) === key);
+        const existing = state.items.find(
+          (it) => getItemKeyFromProduct(it.product) === key,
+        );
         if (!existing) {
           setState({ items: [...state.items, { product, quantity: q }] });
           return;
@@ -125,7 +119,9 @@ export function useCartActions() {
 
         // ✅ qty <= 0 => remove (evita “0 item” bugando UI)
         if (!Number.isFinite(n) || n <= 0) {
-          setState({ items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key) });
+          setState({
+            items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key),
+          });
           return;
         }
 

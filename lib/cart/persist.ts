@@ -1,6 +1,6 @@
 import type { Cart } from "@/lib/domain/Cart";
 
-const KEY = "mp_cart_v1";
+const KEY = "mp_cart_v2";
 
 export function loadCart(): Cart {
   if (typeof window === "undefined") return { items: [] };

@@ -1,8 +1,11 @@
 import type { Cart } from "@/lib/domain/Cart";
 import { computeCartTotals } from "@/lib/cart/rules";
 
-function fmt(v: number) {
-  return new Intl.NumberFormat(undefined, { style: "currency", currency: "BRL" }).format(v);
+function fmt(vCents: number) {
+  const v = (Number.isFinite(vCents) ? vCents : 0) / 100;
+  return new Intl.NumberFormat(undefined, { style: "currency", currency: "BRL" }).format(
+    v,
+  );
 }
 
 export default function CartSummary({ cart }: { cart: Cart }) {
