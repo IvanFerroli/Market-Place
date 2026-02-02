@@ -1,0 +1,41 @@
+{
+  "brand": "NCART",
+  "tagline": "Curated cyberware",
+  "colors": {
+    "accent": {
+      "name": "acid-yellow",
+      "hex": "#FFE600"
+    },
+    "silver": {
+      "name": "cool-silver",
+      "hex": "#DEE2E8"
+    },
+    "bg": {
+      "name": "ink",
+      "hex": "#030508"
+    },
+    "text": {
+      "name": "off-white",
+      "hex": "#EBEEF2"
+    },
+    "muted": {
+      "name": "steel",
+      "hex": "#B4BAC4"
+    }
+  },
+  "typography": {
+    "display": [
+      "Space Grotesk",
+      "Sora",
+      "system-ui"
+    ],
+    "ui": [
+      "Inter",
+      "system-ui"
+    ],
+    "mono_optional": [
+      "JetBrains Mono",
+      "ui-monospace"
+    ]
+  }
+}

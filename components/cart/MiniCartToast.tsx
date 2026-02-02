@@ -119,12 +119,8 @@ export default function CartToast({ productId }: Props) {
                 onClick={handleCheckoutMock}
                 className="cp-btn cp-btn-primary h-10 px-4 ml-auto"
               >
-                Checkout (mock)
+                Checkout
               </button>
-            </div>
-
-            <div className="text-[11px] text-white/50">
-              (MVP) Checkout real depois — aqui a gente só mantém tudo na mesma página.
             </div>
           </div>
         )}

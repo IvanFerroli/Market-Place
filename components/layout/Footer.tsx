@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="mt-14 cp-footer">
       <Container className="py-10 text-sm">
         <p className="text-white/70">
-          © {new Date().getFullYear()} Market Place — Night City edition.
+          © {new Date().getFullYear()} NCART — Curated Cyberware.
         </p>
       </Container>
     </footer>

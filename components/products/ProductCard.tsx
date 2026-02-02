@@ -44,9 +44,6 @@ export default function ProductCard({ product }: { product: Product }) {
       {/* CTA */}
       <div className="px-4 pb-4 pt-2 border-t border-white/10">
         <CartButton product={product} />
-        <div className="cp-dim mt-2 text-[11px]">
-          Quick view pelo card — checkout fica no toast.
-        </div>
       </div>
     </div>
   );
