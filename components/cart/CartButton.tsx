@@ -8,7 +8,13 @@ import Button from "@/components/ui/Button";
 import type { Product } from "@/lib/domain/Product";
 import { useCartActions } from "@/lib/cart/store";
 
-export default function CartButton({ product }: { product?: Product }) {
+type Props = {
+  product?: Product;
+  openCartOnAdd?: boolean; // default: true (comportamento atual)
+  onAdded?: () => void; // callback opcional (pra feedback no QuickView)
+};
+
+export default function CartButton({ product, openCartOnAdd = true, onAdded }: Props) {
   const { addItem } = useCartActions();
 
   // simple guard against accidental double click
@@ -23,11 +29,15 @@ export default function CartButton({ product }: { product?: Product }) {
 
           addItem(product, 1);
 
-          // sempre abre via evento do cart (provider faz a ponte pra toast)
-          openCart({
-            source: "add_to_cart_button",
-            productId: asId(product.id),
-          });
+          onAdded?.();
+
+          if (openCartOnAdd) {
+            // abre via evento do cart (provider faz a ponte pra toast)
+            openCart({
+              source: "add_to_cart_button",
+              productId: asId(product.id),
+            });
+          }
 
           window.setTimeout(() => {
             addingRef.current = false;
