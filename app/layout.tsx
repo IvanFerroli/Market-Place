@@ -13,10 +13,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white text-gray-900">
+      <body className="min-h-screen bg-white text-gray-900 pt-[76px]">
         <CartDrawerProvider>
           <Header />
-          <main className="min-h-[70vh]">{children}</main>
+          <main className="min-h-[70vh] pt-20">{children}</main>
           <Footer />
         </CartDrawerProvider>
       </body>
