@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 import Container from "./Container";
 import CartButton from "@/components/cart/CartButton";
 import CartBadge from "@/components/cart/CartBadge";
-import HomeButton from "@/components/cart/HomeButton";
+import FiltersToggleButton from "@/components/cart/FiltersToggleButton";
 import ScrollProgressBar from "./ScrollProgressBar";
 import Image from "next/image";
+import SearchBar from "@/components/search/SearchBar";
+import FilterBar from "@/components/search/FilterBar";
 
 const SCROLL_THRESHOLD = 24;
 
@@ -44,7 +46,7 @@ export default function Header() {
       ].join(" ")}
     >
       {/* altura total alinhada com teu body pt-[76px] */}
-      <Container className="flex h-[64px] sm:h-[76px] max-w-7xl items-center justify-between">
+      <Container className="flex h-[64px] sm:h-[76px] max-w-7xl items-center justify-between gap-4">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3" aria-label="NCART home">
           {/* Mobile: mark (sempre visível) */}
@@ -73,10 +75,19 @@ export default function Header() {
           </div>
         </Link>
 
+        {/* Search (middle) */}
+        <div className="hidden sm:flex flex-1 items-center justify-center px-4">
+          <div className="flex w-full max-w-[520px] items-center gap-2">
+            <div className="flex-1">
+              <SearchBar placeholder="Search products…" debounceMs={150} />
+            </div>
+          </div>
+        </div>
+
         {/* Nav / Actions */}
         <nav className="flex items-center gap-3">
           <div className="relative hidden sm:block">
-            <HomeButton />
+            <FiltersToggleButton />
           </div>
 
           <div className="relative">
@@ -85,6 +96,7 @@ export default function Header() {
           </div>
         </nav>
       </Container>
+       <FilterBar />
 
       {/* progress bar agora funciona como “accent line” do header */}
       <ScrollProgressBar />

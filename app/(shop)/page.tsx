@@ -1,6 +1,7 @@
-import ProductGrid from "@/components/products/ProductGrid";
 import ProductCarouselSSR from "@/components/products/ProductCarouselSSR";
 import { listProducts } from "@/lib/data/productsStore";
+import ProductFiltersClient from "@/components/search/ProductFiltersClient";
+import HideWhenQueryActive from "@/components/search/HideWhenQueryActive";
 
 export const metadata = {
   title: "NCART - Curated Cyberware",
@@ -11,8 +12,11 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-6">
-      <ProductCarouselSSR products={products} title="Featured products" />
-      <ProductGrid products={products} />
+      <HideWhenQueryActive>
+        <ProductCarouselSSR products={products} title="Featured products" />
+      </HideWhenQueryActive>
+
+      <ProductFiltersClient products={products} />
     </div>
   );
 }
