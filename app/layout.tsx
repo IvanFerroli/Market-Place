@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ToastProvider from "@/components/ui/ToastProvider";
 import CartToastProvider from "@/components/cart/MiniCartToastProvider";
+import { listProducts } from "@/lib/data/productsStore";
 
 export const metadata: Metadata = {
   title: {
@@ -44,15 +45,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  let categories: string[] = [];
+
+  try {
+    const products = await listProducts();
+    categories = Array.from(
+      new Set((products ?? []).map((p) => p.category).filter(Boolean)),
+    ).sort((a, b) => a.localeCompare(b));
+  } catch {
+    // fallback seguro: não quebra o app se der algo estranho na leitura do JSON
+    categories = [];
+  }
+
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen cp-body">
         <ToastProvider>
           <CartToastProvider>
-            <Header />
+            <Header categories={categories} />
+
             <main className="min-h-[70vh] pt-20">{children}</main>
             <Footer />
           </CartToastProvider>

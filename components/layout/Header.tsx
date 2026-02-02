@@ -14,7 +14,7 @@ import FilterBar from "@/components/search/FilterBar";
 
 const SCROLL_THRESHOLD = 24;
 
-export default function Header() {
+export default function Header({ categories = [] }: { categories?: string[] }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function Header() {
           </div>
         </nav>
       </Container>
-       <FilterBar />
+      <FilterBar categories={categories} />
 
       {/* progress bar agora funciona como “accent line” do header */}
       <ScrollProgressBar />

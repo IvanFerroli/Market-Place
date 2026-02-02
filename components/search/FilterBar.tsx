@@ -14,7 +14,7 @@ function isTruthy(v: string) {
   return s === "1" || s === "true" || s === "yes" || s === "on";
 }
 
-export default function FilterBar() {
+export default function FilterBar({ categories = [] }: { categories?: string[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -69,12 +69,28 @@ export default function FilterBar() {
       <Container className="flex flex-wrap items-center gap-3 py-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-white/70">Category</span>
-          <Input
+
+          <select
             value={category}
-            onChange={(v) => setCategoryDebounced(v)}
-            placeholder="e.g. cyber"
-            className="w-[200px]"
-          />
+            onChange={(e) => {
+              const v = e.target.value;
+              setCategory(v);
+              replaceParams((p) => {
+                if (!v) p.delete("category");
+                else p.set("category", v);
+              });
+            }}
+            className="rounded-lg border px-3 py-2 text-sm"
+          >
+            <option value="">All</option>
+            {Array.from(new Set(categories.map((c) => c.trim()).filter(Boolean)))
+              .sort((a, b) => a.localeCompare(b))
+              .map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+          </select>
         </div>
 
         <div className="flex items-center gap-2">
@@ -116,12 +132,13 @@ export default function FilterBar() {
 
         <div className="flex-1" />
 
-        <Button variant="ghost" onClick={onResetFilters}>
+        <Button variant="ghost" className="cp-btn cp-btn-danger" onClick={onResetFilters}>
           Reset filters
         </Button>
 
         <Button
           variant="ghost"
+          className="cp-btn cp-btn-danger"
           onClick={() => {
             replaceParams((p) => p.delete("filters"));
           }}

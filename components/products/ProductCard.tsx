@@ -5,7 +5,6 @@ import CartButton from "@/components/cart/CartButton";
 import ProductQuickViewToastTrigger from "@/components/products/ProductQuickViewToastTrigger";
 import ProductPrice from "@/components/products/ProductPrice";
 
-
 export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="cp-card group">
@@ -28,7 +27,9 @@ export default function ProductCard({ product }: { product: Product }) {
               <div className="cp-price text-sm">
                 <ProductPrice value={product.priceCents} />
               </div>
-              <div className="cp-dim text-[11px] mt-0.5">in stock</div>
+              <div className="cp-dim text-[11px] mt-0.5">
+                {(product.stock ?? 0) > 0 ? "in stock" : "out of stock"}
+              </div>
             </div>
           </div>
 
