@@ -6,13 +6,24 @@ import { getProductById } from "@/lib/data/productsStore";
 import Badge from "@/components/ui/Badge";
 import ProductPdpCart from "@/components/products/ProductPdpCart";
 
+type SearchParams = Record<string, string | string[] | undefined>;
+
+function first(v: string | string[] | undefined) {
+  return Array.isArray(v) ? String(v[0] ?? "") : String(v ?? "");
+}
+
 type PageProps = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<SearchParams>;
 };
 
-export default async function ProductPage({ params }: PageProps) {
+export default async function ProductPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const product = await getProductById(id);
+
+  const sp = (await searchParams) ?? {};
+  const source = first(sp.source).trim().toLowerCase() || undefined;
+
+  const product = await getProductById(id, source);
 
   if (!product) return notFound();
 
@@ -37,7 +48,11 @@ export default async function ProductPage({ params }: PageProps) {
             <div className="min-h-0 p-6 flex flex-col">
               <div className="mb-4">
                 <Link
-                  href="/?restore=1"
+                  href={
+                    source
+                      ? `/?restore=1&source=${encodeURIComponent(source)}`
+                      : "/?restore=1"
+                  }
                   scroll={false}
                   className="cp-navlink text-sm"
                   aria-label="Back to products"

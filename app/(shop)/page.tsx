@@ -8,14 +8,30 @@ export const metadata = {
   title: "NCART - Curated Cyberware",
 };
 
-export default async function HomePage() {
-  const products = await listProducts();
+type SearchParams = Record<string, string | string[] | undefined>;
+
+function first(v: string | string[] | undefined) {
+  return Array.isArray(v) ? String(v[0] ?? "") : String(v ?? "");
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>;
+}) {
+  const sp = (await searchParams) ?? {};
+  const source = first(sp.source).trim().toLowerCase() || undefined;
+
+  const products = await listProducts(source);
 
   return (
     <div className="space-y-6">
       <Suspense fallback={null}>
         <HideWhenQueryActive>
-          <ProductCarouselSSR products={products} title="Featured products" />
+          <ProductCarouselSSR
+            products={products}
+            title={source === "blackmarket" ? "Black market drops" : "Featured products"}
+          />
         </HideWhenQueryActive>
       </Suspense>
 

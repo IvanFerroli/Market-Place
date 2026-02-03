@@ -8,6 +8,7 @@ import ToastProvider from "@/components/ui/ToastProvider";
 import CartToastProvider from "@/components/cart/MiniCartToastProvider";
 import { listProducts } from "@/lib/data/productsStore";
 import SkippyWebchat from "@/components/botpress/SkippyWebchat";
+import BlackMarketMode from "@/components/layout/BlackMarketMode";
 
 export const metadata: Metadata = {
   title: {
@@ -65,6 +66,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen cp-body">
+        <Suspense fallback={null}>
+          <BlackMarketMode />
+        </Suspense>
+
         <ToastProvider>
           <CartToastProvider>
             <Suspense fallback={null}>
