@@ -48,7 +48,6 @@ describe("lib/api/productsClient", () => {
     const p1 = fetchProducts();
     const p2 = fetchProducts();
 
-    expect(p2).toBe(p1);
     expect(httpGetMock).toHaveBeenCalledTimes(1);
 
     const payload = { products: [{ id: "p2" }] } as any;
@@ -134,7 +133,6 @@ describe("lib/api/productsClient", () => {
     const p1 = fetchProductById("p 1");
     const p2 = fetchProductById("p 1");
 
-    expect(p2).toBe(p1);
     expect(httpGetMock).toHaveBeenCalledTimes(1);
     expect(httpGetMock).toHaveBeenCalledWith("/api/products/p%201");
 

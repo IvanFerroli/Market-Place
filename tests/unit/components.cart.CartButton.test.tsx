@@ -10,9 +10,11 @@ const mockAddItem = jest.fn();
 
 jest.mock("@/lib/cart/events", () => ({
   openCart: jest.fn(),
+  toggleCart: jest.fn(),
 }));
 
 jest.mock("@/lib/cart/store", () => ({
+  useCartSnapshot: () => ({ items: [] }),
   useCartActions: () => ({
     addItem: (...args: any[]) => mockAddItem(...args),
   }),
@@ -24,10 +26,10 @@ describe("CartButton", () => {
     mockAddItem.mockReset();
   });
 
-  test("header mode: opens cart with source=header", () => {
+  test("header mode: toggles cart", () => {
     render(<CartButton />);
     fireEvent.click(screen.getByRole("button", { name: "Cart" }));
-    expect(openCart).toHaveBeenCalledWith({ source: "header" });
+    expect(toggleCart).toHaveBeenCalledTimes(1);
   });
 
   test("product mode: adds item and opens cart (default)", () => {

@@ -8,6 +8,7 @@ import CartQuantityStepper from "@/components/cart/CartQuantityStepper";
 const mockSetQty = jest.fn();
 
 jest.mock("@/lib/cart/store", () => ({
+  useCartSnapshot: () => ({ items: [] }),
   useCartActions: () => ({
     setQty: (...args: any[]) => mockSetQty(...args),
   }),
