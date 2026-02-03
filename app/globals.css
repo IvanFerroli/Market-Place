@@ -587,3 +587,34 @@ body.route-product-fullscreen main {
   background: rgba(255, 255, 255, 0.18);
   background-clip: content-box;
 }
+
+/* =========================
+   Black market mode (source=blackmarket)
+   ========================= */
+
+html.bm-mode {
+  /* um pouco mais “noir”, sem mudar o tema inteiro */
+  --cp-bg: #040007;
+  --cp-bg2: #080010;
+
+  /* glass um tiquinho mais pesado */
+  --cp-glass: rgba(0, 0, 0, 0.76);
+  --cp-glass-strong: rgba(0, 0, 0, 0.88);
+
+  /* glow mais “crime scene”: vermelho + magenta, mantendo cyan */
+  --cp-glow:
+    0 0 0 1px rgba(197, 0, 60, 0.16), 0 0 26px rgba(255, 43, 214, 0.1),
+    0 0 42px rgba(85, 234, 212, 0.1);
+}
+
+html.bm-mode .cp-body::after {
+  background:
+    radial-gradient(1100px 680px at 18% 12%, rgba(197, 0, 60, 0.16), transparent 60%),
+    radial-gradient(900px 620px at 86% 22%, rgba(255, 43, 214, 0.1), transparent 58%),
+    radial-gradient(760px 520px at 72% 88%, rgba(85, 234, 212, 0.12), transparent 62%),
+    linear-gradient(180deg, var(--cp-bg), var(--cp-bg2));
+}
+
+html.bm-mode .cp-body::before {
+  opacity: 0.28;
+}
