@@ -11,11 +11,11 @@ type ToastItem = ToastOpenPayload & {
   leavingAt?: number;
 };
 
-const MOTION_MS = 180;
+const MOTION_MS = 260;
 
 function motionClass(state: UiState, variant: "center" | "br") {
   const base =
-    "transform-gpu will-change-transform will-change-opacity transition-[transform,opacity] duration-200 ease-out";
+    "transform-gpu will-change-transform will-change-opacity transition-[transform,opacity] duration-300 ease-out";
 
   const enter =
     variant === "center"
@@ -166,7 +166,8 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
           }}
           className={[
             "fixed inset-0 z-[9998] bg-black/10 backdrop-blur-md",
-            "transition-opacity duration-200 ease-out",
+            "transition-opacity duration-300 ease-out",
+
             centerVisible ? "opacity-100" : "opacity-0 pointer-events-none",
           ].join(" ")}
         />
