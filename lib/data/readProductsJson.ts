@@ -26,12 +26,16 @@ function unwrapJsonDefault<T>(mod: JsonModule<T>): T {
     ? (mod as { default: T }).default
     : (mod as T);
 }
+
+function normalize(raw: unknown): Product {
   if (raw == null) throw new Error("Invalid product: null/undefined");
 
-  const id = String(raw.id ?? "").trim();
+  const r = raw as Record<string, unknown>;
+
+  const id = String(r.id ?? "").trim();
   if (!id) throw new Error("Invalid product.id");
 
-  const price = Number(raw.price);
+  const price = Number(r.price);
   if (!Number.isFinite(price)) throw new Error("Invalid product.price (number)");
 
   const priceCents = Math.round(price * 100);
@@ -39,16 +43,16 @@ function unwrapJsonDefault<T>(mod: JsonModule<T>): T {
     throw new Error("Invalid product.priceCents");
   }
 
-  const stock = Number(raw.stock ?? 0);
+  const stock = Number(r.stock ?? 0);
   if (!Number.isFinite(stock)) throw new Error("Invalid product.stock");
 
   return {
     id,
-    name: String(raw.name ?? ""),
+    name: String(r.name ?? ""),
     priceCents,
-    description: String(raw.description ?? ""),
-    image: String(raw.image ?? ""),
-    category: String(raw.category ?? ""),
+    description: String(r.description ?? ""),
+    image: String(r.image ?? ""),
+    category: String(r.category ?? ""),
     stock,
   };
 }
