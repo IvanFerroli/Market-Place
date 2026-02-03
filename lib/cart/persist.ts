@@ -1,7 +1,24 @@
 import type { Cart } from "@/lib/domain/Cart";
 
+/**
+ * localStorage key for persisted cart state.
+ *
+ * Bump the suffix (`_v2`, `_v3`, ...) when the persisted shape changes in a
+ * non-backward-compatible way.
+ */
 const KEY = "mp_cart_v2";
 
+/**
+ * Loads the cart from localStorage.
+ *
+ * SSR/edge safety:
+ * - Returns an empty cart when `window` is not available.
+ *
+ * Robustness:
+ * - Tolerates malformed JSON and "dirty" storage values.
+ * - Enforces a minimal item shape (product object + quantity).
+ * - Normalizes quantity into a positive integer (defaults to 1).
+ */
 export function loadCart(): Cart {
   if (typeof window === "undefined") return { items: [] };
 
@@ -38,6 +55,15 @@ export function loadCart(): Cart {
   }
 }
 
+/**
+ * Saves the cart to localStorage.
+ *
+ * SSR/edge safety:
+ * - No-op when `window` is not available.
+ *
+ * Failure handling:
+ * - Swallows storage errors (quota, privacy mode, etc.) to avoid breaking UX.
+ */
 export function saveCart(cart: Cart) {
   if (typeof window === "undefined") return;
   try {
