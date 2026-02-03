@@ -12,16 +12,25 @@ export function loadCart(): Cart {
     const parsed = JSON.parse(raw) as any;
     const items = Array.isArray(parsed?.items) ? parsed.items : [];
 
-    // valida shape mínimo
+    // valida shape mínimo + tolerância a lixo no storage
     const safeItems = items
       .filter(
         (it: any) =>
-          it && typeof it === "object" && it.product && typeof it.quantity === "number",
+          it &&
+          typeof it === "object" &&
+          it.product &&
+          typeof it.product === "object" &&
+          "quantity" in it,
       )
-      .map((it: any) => ({
-        product: it.product,
-        quantity: Number.isFinite(it.quantity) ? it.quantity : 1,
-      }));
+      .map((it: any) => {
+        const rawQty = Number(it.quantity);
+        const quantity = Number.isFinite(rawQty) && rawQty > 0 ? Math.floor(rawQty) : 1;
+
+        return {
+          product: it.product,
+          quantity,
+        };
+      });
 
     return { items: safeItems };
   } catch {
