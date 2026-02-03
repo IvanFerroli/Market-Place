@@ -15,9 +15,15 @@ const ENV_VALUE =
   "https://files.bpcontent.cloud/2025/04/27/22/20250427224443-L36685G9.js";
 
 const TYPEDOC_INDEX = path.join(ROOT, "docs", "typedoc", "index.html");
+const COVERAGE_INDEX = path.join(ROOT, "coverage", "lcov-report", "index.html");
+
 const APP_URL = process.env.DX_APP_URL ?? "http://localhost:3000";
 const OPEN_UI = (process.env.DX_OPEN_UI ?? "1") !== "0"; // 1 = abre navegador
 const RUN_TESTS = (process.env.DX_SKIP_TESTS ?? "0") !== "1";
+
+// Se DX_COVERAGE=1, roda coverage HTML e abre o report
+const RUN_COVERAGE = (process.env.DX_COVERAGE ?? "0") === "1";
+
 const RUN_E2E = (process.env.DX_E2E ?? "0") === "1"; // opcional
 // ======================================================================
 
@@ -116,7 +122,7 @@ function ensureNode20() {
   if (major !== 20) {
     console.warn(
       `Aviso: package.json pede node 20.x, mas você está em ${process.versions.node}. ` +
-        `Pode funcionar, mas pode gerar warnings (ex.: swc mismatch).`,
+        `Pode funcionar, mas pode gerar warnings.`,
     );
   }
 }
@@ -176,11 +182,16 @@ function ensureTypedoc() {
 
   if (!ok) {
     console.log("TypeDoc não encontrado. Gerando...");
-    run("pnpm docs");
+    // pnpm v10 tem comando builtin "docs" (abre docs no browser) -> usa "run" pra forçar o script
+    const okRun = run("pnpm run docs", { allowFail: true });
+    if (!okRun) {
+      console.warn(
+        "Aviso: falhou ao gerar TypeDoc (pnpm run docs). Seguindo o DX mesmo assim.",
+      );
+    }
   }
 
   if (fs.existsSync(TYPEDOC_INDEX)) {
-    // No WSL, é melhor abrir pelo path (vai virar C:\...\index.html via wslpath)
     const target = isWSL() ? TYPEDOC_INDEX : pathToFileURL(TYPEDOC_INDEX).href;
     tryOpen(target);
     console.log(`TypeDoc: ${path.relative(ROOT, TYPEDOC_INDEX)}`);
@@ -189,18 +200,36 @@ function ensureTypedoc() {
   }
 }
 
+function openCoverageReport() {
+  if (!fs.existsSync(COVERAGE_INDEX)) {
+    console.warn("Aviso: coverage HTML não encontrado.");
+    return;
+  }
+  const target = isWSL() ? COVERAGE_INDEX : pathToFileURL(COVERAGE_INDEX).href;
+  tryOpen(target);
+  console.log(`Coverage: ${path.relative(ROOT, COVERAGE_INDEX)}`);
+}
+
 function runUnitTests() {
   if (!RUN_TESTS) return;
+
+  // coverage HTML também roda os testes — evita rodar 2x
+  if (RUN_COVERAGE) {
+    banner("Rodando coverage (HTML + summary)");
+    run("pnpm run test:coverage:html");
+    openCoverageReport();
+    return;
+  }
+
   banner("Rodando testes (unit)");
-  run("pnpm test");
+  run("pnpm run test");
 }
 
 function runE2E() {
   if (!RUN_E2E) return;
   banner("Rodando E2E (Playwright)");
-  // installs browsers (se já tiver, é rápido)
   run("pnpm exec playwright install", { allowFail: true });
-  run("pnpm e2e");
+  run("pnpm run e2e");
 }
 
 async function waitForApp(url, timeoutMs = 45_000) {
@@ -219,7 +248,7 @@ async function waitForApp(url, timeoutMs = 45_000) {
 
 async function startDevServer() {
   banner("Subindo Next (pnpm dev)");
-  const child = spawn("pnpm", ["dev"], {
+  const child = spawn("pnpm", ["run", "dev"], {
     cwd: ROOT,
     stdio: "inherit",
     shell: process.platform === "win32",
@@ -252,7 +281,7 @@ async function startDevServer() {
   // 2) Abre docs depois que o app já tá no ar (menos ruído no começo)
   ensureTypedoc();
 
-  // 3) Testes mais perto da ponta
+  // 3) Testes/coverage mais perto da ponta
   runUnitTests();
   runE2E();
 
