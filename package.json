@@ -12,9 +12,9 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier . --write",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test": "jest tests/unit",
+    "test:watch": "jest tests/unit --watch",
+    "test:coverage": "jest tests/unit --coverage"
   },
   "dependencies": {
     "clsx": "^2.1.1",
