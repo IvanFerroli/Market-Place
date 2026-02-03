@@ -18,7 +18,7 @@ export default function FilterBar({ categories = [] }: { categories?: string[] }
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
-  const open = sp.get("filters") === "1";
+  const openParam = sp.get("filters") === "1";
 
   const urlCategory = sp.get("category") ?? "";
   const urlSort = sp.get("sort") ?? "";
@@ -62,10 +62,73 @@ export default function FilterBar({ categories = [] }: { categories?: string[] }
     });
   };
 
-  if (!open) return null;
+  // ---- enter/exit animation (slide + fade + collapse)
+  const MOTION_MS = 320;
+
+  const [render, setRender] = useState(openParam);
+  const [shown, setShown] = useState(openParam);
+  const boxRef = useRef<HTMLDivElement | null>(null);
+  const [maxH, setMaxH] = useState(0);
+
+  // mantém max-height alinhado quando estiver aberto (ex.: resize, fontes, etc.)
+  useEffect(() => {
+    if (!render) return;
+    const el = boxRef.current;
+    if (!el) return;
+
+    const id = window.requestAnimationFrame(() => {
+      setMaxH(el.scrollHeight);
+    });
+
+    return () => window.cancelAnimationFrame(id);
+  }, [render, shown, category, sort, urlInStock, categories.length]);
+
+  useEffect(() => {
+    // ABRINDO
+    if (openParam) {
+      setRender(true);
+      window.requestAnimationFrame(() => {
+        const el = boxRef.current;
+        setMaxH(el?.scrollHeight ?? 0);
+        setShown(true);
+      });
+      return;
+    }
+
+    // FECHANDO (segura no DOM pra animar saída)
+    if (!openParam && render) {
+      const el = boxRef.current;
+      const h = el?.scrollHeight ?? 0;
+
+      setShown(false);
+      setMaxH(h);
+
+      // no próximo frame: colapsa (max-height -> 0)
+      window.requestAnimationFrame(() => {
+        setMaxH(0);
+      });
+
+      const t = window.setTimeout(() => {
+        setRender(false);
+      }, MOTION_MS);
+
+      return () => window.clearTimeout(t);
+    }
+  }, [openParam, render]);
+
+  if (!render) return null;
 
   return (
-    <div className="border-t border-white/10">
+    <div
+      ref={boxRef}
+      style={{ maxHeight: maxH }}
+      className={[
+        "overflow-hidden border-t border-white/10",
+        "transform-gpu transition-[max-height,opacity,transform] duration-300 ease-out",
+        "motion-reduce:transition-none motion-reduce:transform-none",
+        shown ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2",
+      ].join(" ")}
+    >
       <Container className="flex flex-wrap items-center gap-3 py-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-white/70">Category</span>
