@@ -69,16 +69,31 @@ function clampQty(qty: number) {
   return Math.max(1, Math.floor(n));
 }
 
+function getStockCap(product: Product): number | null {
+  // stock pode vir do JSON normalizado (esperado), mas mantém defensivo
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const n = Number((product as any)?.stock);
+  if (!Number.isFinite(n)) return null;
+  return Math.max(0, Math.floor(n));
+}
+
 function normalizeCart(input: unknown): State {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const coerceItems = (arr: any[]): State["items"] =>
     arr
       .filter((it) => it && it.product)
-      .map((it) => ({
-        product: it.product as Product,
+      .map((it) => {
+        const product = it.product as Product;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        quantity: clampQty((it as any).quantity ?? (it as any).qty ?? 1),
-      }));
+        const desired = clampQty((it as any).quantity ?? (it as any).qty ?? 1);
+
+        const cap = getStockCap(product);
+        if (cap === 0) return null;
+
+        const quantity = cap === null ? desired : Math.min(desired, cap);
+        return { product, quantity };
+      })
+      .filter(Boolean) as State["items"];
 
   if (Array.isArray(input)) return { items: coerceItems(input) };
 
@@ -156,16 +171,34 @@ export const cartActions = {
     const key = getItemKeyFromProduct(product);
 
     const existing = state.items.find((it) => getItemKeyFromProduct(it.product) === key);
-    if (!existing) {
-      setState({ items: [...state.items, { product, quantity: q }] });
+    const cap = getStockCap(existing?.product ?? product);
+
+    // sem estoque => não adiciona (e remove se já existir)
+    if (cap === 0) {
+      if (existing) {
+        setState({
+          items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key),
+        });
+      }
       return;
     }
 
+    if (!existing) {
+      const nextQty = cap === null ? q : Math.min(q, cap);
+      if (nextQty <= 0) return;
+      setState({ items: [...state.items, { product, quantity: nextQty }] });
+      return;
+    }
+
+    const desired = existing.quantity + q;
+    const nextQty = cap === null ? desired : Math.min(desired, cap);
+
+    // já está no limite => não muda
+    if (nextQty === existing.quantity) return;
+
     setState({
       items: state.items.map((it) =>
-        getItemKeyFromProduct(it.product) === key
-          ? { ...it, quantity: clampQty(it.quantity + q) }
-          : it,
+        getItemKeyFromProduct(it.product) === key ? { ...it, quantity: nextQty } : it,
       ),
     });
   },
@@ -184,7 +217,20 @@ export const cartActions = {
       return;
     }
 
-    const q = clampQty(n);
+    const existing = state.items.find((it) => getItemKeyFromProduct(it.product) === key);
+    const desired = clampQty(n);
+
+    const cap = existing ? getStockCap(existing.product) : null;
+
+    // sem estoque => remove
+    if (cap === 0) {
+      setState({
+        items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key),
+      });
+      return;
+    }
+
+    const q = cap === null ? desired : Math.min(desired, cap);
 
     setState({
       items: state.items.map((it) =>

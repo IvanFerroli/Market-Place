@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { openCart, toggleCart } from "@/lib/cart/events";
 import { asId } from "@/lib/utils/ids";
 
 import Button from "@/components/ui/Button";
 import type { Product } from "@/lib/domain/Product";
-import { useCartActions } from "@/lib/cart/store";
+import { useCartActions, useCartSnapshot } from "@/lib/cart/store";
 
 type Props = {
   product?: Product;
@@ -14,16 +14,45 @@ type Props = {
   onAdded?: () => void; // callback opcional (pra feedback no QuickView)
 };
 
+function getStockCap(product: Product): number | null {
+  const n = Number((product as unknown as { stock?: unknown })?.stock);
+  if (!Number.isFinite(n)) return null;
+  return Math.max(0, Math.floor(n));
+}
+
 export default function CartButton({ product, openCartOnAdd = true, onAdded }: Props) {
+  const cart = useCartSnapshot();
   const { addItem } = useCartActions();
 
   // simple guard against accidental double click
   const addingRef = useRef(false);
 
+  const [limitHit, setLimitHit] = useState(false);
+
   if (product) {
+    const cap = getStockCap(product);
+    const outOfStock = cap !== null && cap <= 0;
+
+    const currentQty =
+      cart.items.find((it) => String(it.product.id) === String(product.id))?.quantity ?? 0;
+
+    const atLimit = cap !== null && currentQty >= cap;
+
     return (
       <Button
+        variant={outOfStock ? "ghost" : undefined}
+        disabled={outOfStock}
+        className={outOfStock ? "opacity-50 cursor-not-allowed" : undefined}
         onClick={() => {
+          if (outOfStock) return;
+
+          // aviso quando tenta passar do estoque
+          if (atLimit) {
+            setLimitHit(true);
+            window.setTimeout(() => setLimitHit(false), 900);
+            return;
+          }
+
           if (addingRef.current) return;
           addingRef.current = true;
 
@@ -44,7 +73,13 @@ export default function CartButton({ product, openCartOnAdd = true, onAdded }: P
           }, 250);
         }}
       >
-        Add to cart
+        {outOfStock
+          ? "Out of stock"
+          : limitHit
+            ? cap !== null
+              ? `Max ${cap} in stock`
+              : "Stock limit reached"
+            : "Add to cart"}
       </Button>
     );
   }
