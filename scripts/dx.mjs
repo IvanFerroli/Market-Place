@@ -21,8 +21,10 @@ const APP_URL = process.env.DX_APP_URL ?? "http://localhost:3000";
 const OPEN_UI = (process.env.DX_OPEN_UI ?? "1") !== "0"; // 1 = abre navegador
 const RUN_TESTS = (process.env.DX_SKIP_TESTS ?? "0") !== "1";
 
-// Se DX_COVERAGE=1, roda coverage HTML e abre o report
-const RUN_COVERAGE = (process.env.DX_COVERAGE ?? "0") === "1";
+// Coverage ON por padrão.
+// - DX_COVERAGE=0 desliga
+// - DX_COVERAGE=1 liga (explicitamente)
+const RUN_COVERAGE = (process.env.DX_COVERAGE ?? "1") !== "0";
 
 const RUN_E2E = (process.env.DX_E2E ?? "0") === "1"; // opcional
 // ======================================================================
@@ -210,13 +212,24 @@ function openCoverageReport() {
   console.log(`Coverage: ${path.relative(ROOT, COVERAGE_INDEX)}`);
 }
 
+function runCoverageHtml() {
+  // Preferido: script dedicado (se existir)
+  const ok = run("pnpm run test:coverage:html", { allowFail: true });
+  if (ok) return;
+
+  // Fallback: usa o test:coverage e injeta reporters/directory via args
+  run(
+    "pnpm run test:coverage -- --coverageDirectory=coverage --coverageReporters=text-summary --coverageReporters=html --coverageReporters=lcov",
+  );
+}
+
 function runUnitTests() {
   if (!RUN_TESTS) return;
 
   // coverage HTML também roda os testes — evita rodar 2x
   if (RUN_COVERAGE) {
     banner("Rodando coverage (HTML + summary)");
-    run("pnpm run test:coverage:html");
+    runCoverageHtml();
     openCoverageReport();
     return;
   }

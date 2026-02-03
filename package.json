@@ -17,6 +17,8 @@
     "test:coverage": "jest tests/unit --coverage",
     "test:coverage:summary": "jest tests/unit --coverage --coverageDirectory=coverage --coverageReporters=text-summary",
     "test:coverage:html": "jest tests/unit --coverage --coverageDirectory=coverage --coverageReporters=text-summary --coverageReporters=html --coverageReporters=lcov",
+    "test:coverage:summary": "jest tests/unit --coverage --coverageDirectory=coverage --coverageReporters=text-summary",
+    "test:coverage:html": "jest tests/unit --coverage --coverageDirectory=coverage --coverageReporters=text-summary --coverageReporters=html --coverageReporters=lcov",
     "docs": "typedoc",
     "e2e": "playwright test",
     "dx": "node scripts/dx.mjs"
