@@ -11,12 +11,6 @@ function normSource(source?: string) {
   return s || "default";
 }
 
-function getBaseUrl() {
-  // Vercel fornece VERCEL_URL sem protocolo
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
-}
-
 async function tryReadUtf8(p: string) {
   try {
     return await readFile(p, "utf-8");
@@ -83,11 +77,13 @@ export async function readProductsJson(source?: string): Promise<Product[]> {
   if (raw == null) {
     try {
       if (key === "blackmarket") {
-        const mod = await import("../../public/data/blackmarket.json");
-        raw = JSON.stringify((mod as any).default ?? mod);
+        const mod =
+          (await import("../../public/data/blackmarket.json")) as JsonModule<unknown>;
+        raw = JSON.stringify(unwrapJsonDefault(mod));
       } else {
-        const mod = await import("../../public/data/products.json");
-        raw = JSON.stringify((mod as any).default ?? mod);
+        const mod =
+          (await import("../../public/data/products.json")) as JsonModule<unknown>;
+        raw = JSON.stringify(unwrapJsonDefault(mod));
       }
     } catch (err) {
       throw new Error(
