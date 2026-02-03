@@ -11,6 +11,20 @@ function normSource(source?: string) {
   return s || "default";
 }
 
+function getBaseUrl() {
+  // Vercel fornece VERCEL_URL sem protocolo
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+}
+
+async function tryReadUtf8(p: string) {
+  try {
+    return await readFile(p, "utf-8");
+  } catch {
+    return null;
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalize(raw: any): Product {
   if (raw == null) throw new Error("Invalid product: null/undefined");
@@ -45,39 +59,47 @@ export async function readProductsJson(source?: string): Promise<Product[]> {
   const cached = cacheBySource.get(key);
   if (cached) return cached;
 
+  const filename = key === "blackmarket" ? "blackmarket.json" : "products.json";
+
   const candidates =
     key === "blackmarket"
       ? [
           path.join(process.cwd(), "blackmarket.json"), // opcional (raiz)
-          path.join(process.cwd(), "public", "data", "blackmarket.json"), // principal
+          path.join(process.cwd(), "public", "data", "blackmarket.json"), // principal (dev/build)
         ]
       : [
           path.join(process.cwd(), "products.json"), // desafio (raiz)
-          path.join(process.cwd(), "public", "data", "products.json"), // fallback (teu repo atual)
+          path.join(process.cwd(), "public", "data", "products.json"), // principal (dev/build)
         ];
 
+  // 1) tenta FS (bom pra local/dev e build)
   let raw: string | null = null;
-  let lastErr: unknown = null;
-
   for (const p of candidates) {
-    try {
-      raw = await readFile(p, "utf-8");
-      break;
-    } catch (err) {
-      lastErr = err;
-    }
+    raw = await tryReadUtf8(p);
+    if (raw) break;
   }
 
+  // 2) fallback Vercel-safe: lê do /public como asset estático
   if (raw == null) {
-    throw new Error(
-      `Unable to read products.json. Tried: ${candidates.join(", ")}. Last error: ${String(lastErr)}`,
-    );
+    const url = `${getBaseUrl()}/data/${filename}`;
+    try {
+      const res = await fetch(url, { next: { revalidate: 300 } });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      }
+      raw = JSON.stringify(await res.json());
+    } catch (err) {
+      throw new Error(
+        `Unable to read ${filename}. Tried: ${candidates.join(", ")}. ` +
+          `Fallback fetch failed: ${url}. Last error: ${String(err)}`,
+      );
+    }
   }
 
   const data = JSON.parse(raw);
 
   if (!Array.isArray(data)) {
-    throw new Error("products.json must be an array of products");
+    throw new Error(`${filename} must be an array of products`);
   }
 
   const normalized = data.map(normalize);
