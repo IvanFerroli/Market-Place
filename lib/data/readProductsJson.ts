@@ -19,8 +19,13 @@ async function tryReadUtf8(p: string) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalize(raw: any): Product {
+type JsonModule<T> = { default: T } | T;
+
+function unwrapJsonDefault<T>(mod: JsonModule<T>): T {
+  return typeof mod === "object" && mod !== null && "default" in mod
+    ? (mod as { default: T }).default
+    : (mod as T);
+}
   if (raw == null) throw new Error("Invalid product: null/undefined");
 
   const id = String(raw.id ?? "").trim();
