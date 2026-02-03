@@ -29,7 +29,7 @@ function getSnapshot() {
 
 function ensureHydrated() {
   if (!hydrated) {
-    state = loadCart();
+    state = normalizeCart(loadCart());
     hydrated = true;
   }
 }
@@ -46,7 +46,7 @@ function scheduleCommit() {
 }
 
 function setState(next: State) {
-  state = next;
+  state = normalizeCart(next);
   scheduleCommit();
 }
 
@@ -54,6 +54,23 @@ function clampQty(qty: number) {
   const n = Number(qty);
   if (!Number.isFinite(n)) return 1;
   return Math.max(1, Math.floor(n));
+}
+
+function normalizeCart(input: unknown): State {
+  const coerceItems = (arr: any[]): State["items"] =>
+    arr
+      .filter((it) => it && it.product)
+      .map((it) => ({
+        product: it.product as Product,
+        quantity: clampQty((it as any).quantity ?? (it as any).qty ?? 1),
+      }));
+
+  if (Array.isArray(input)) return { items: coerceItems(input) };
+
+  const maybe = input as any;
+  if (maybe && Array.isArray(maybe.items)) return { items: coerceItems(maybe.items) };
+
+  return { items: [] };
 }
 
 /**
@@ -70,83 +87,117 @@ function getItemKeyFromId(productId: string): string {
   return String(productId);
 }
 
+// -------------------------
+// ✅ API sem React (testável)
+// -------------------------
+
+export function cartInitClient() {
+  // equivalente ao antigo useEffect do useCartStore
+  if (!hydrated) {
+    state = normalizeCart(loadCart());
+    hydrated = true;
+    emit();
+  }
+}
+
+export function cartSubscribe(listener: () => void) {
+  return subscribe(listener);
+}
+
+export function cartGetSnapshot() {
+  return getSnapshot();
+}
+
+export const cartActions = {
+  addItem(product: Product, qty: number) {
+    ensureHydrated();
+
+    const q = clampQty(qty);
+    const key = getItemKeyFromProduct(product);
+
+    const existing = state.items.find((it) => getItemKeyFromProduct(it.product) === key);
+    if (!existing) {
+      setState({ items: [...state.items, { product, quantity: q }] });
+      return;
+    }
+
+    setState({
+      items: state.items.map((it) =>
+        getItemKeyFromProduct(it.product) === key
+          ? { ...it, quantity: clampQty(it.quantity + q) }
+          : it,
+      ),
+    });
+  },
+
+  setQty(productId: string, qty: number) {
+    ensureHydrated();
+
+    const key = getItemKeyFromId(productId);
+    const n = Number(qty);
+
+    // ✅ qty <= 0 => remove (evita “0 item” bugando UI)
+    if (!Number.isFinite(n) || n <= 0) {
+      setState({
+        items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key),
+      });
+      return;
+    }
+
+    const q = clampQty(n);
+
+    setState({
+      items: state.items.map((it) =>
+        getItemKeyFromProduct(it.product) === key ? { ...it, quantity: q } : it,
+      ),
+    });
+  },
+
+  removeItem(productId: string) {
+    ensureHydrated();
+
+    const key = getItemKeyFromId(productId);
+    setState({
+      items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key),
+    });
+  },
+
+  clear() {
+    ensureHydrated();
+    setState({ items: [] });
+  },
+};
+
+// -------------------------
+// ✅ Helpers de teste
+// -------------------------
+
+export function cartResetForTests() {
+  state = { items: [] };
+  listeners = new Set();
+  hydrated = false;
+  commitScheduled = false;
+}
+
+export function cartFlushCommitForTests() {
+  // garante que o queueMicrotask() do scheduleCommit rodou
+  return new Promise<void>((resolve) => queueMicrotask(() => resolve()));
+}
+
+// -------------------------
+// Hooks (wrappers finos)
+// -------------------------
+
 export function useCartStore() {
   useEffect(() => {
-    // init cart persistence once on client
-    if (!hydrated) {
-      state = loadCart();
-      hydrated = true;
-      emit();
-    }
+    cartInitClient();
   }, []);
 }
 
 export function useCartSnapshot() {
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(cartSubscribe, cartGetSnapshot, cartGetSnapshot);
 }
 
 export function useCartActions() {
-  return useMemo(() => {
-    return {
-      addItem(product: Product, qty: number) {
-        ensureHydrated();
-
-        const q = clampQty(qty);
-        const key = getItemKeyFromProduct(product);
-
-        const existing = state.items.find(
-          (it) => getItemKeyFromProduct(it.product) === key,
-        );
-        if (!existing) {
-          setState({ items: [...state.items, { product, quantity: q }] });
-          return;
-        }
-
-        setState({
-          items: state.items.map((it) =>
-            getItemKeyFromProduct(it.product) === key
-              ? { ...it, quantity: clampQty(it.quantity + q) }
-              : it,
-          ),
-        });
-      },
-
-      setQty(productId: string, qty: number) {
-        ensureHydrated();
-
-        const key = getItemKeyFromId(productId);
-        const n = Number(qty);
-
-        // ✅ qty <= 0 => remove (evita “0 item” bugando UI)
-        if (!Number.isFinite(n) || n <= 0) {
-          setState({
-            items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key),
-          });
-          return;
-        }
-
-        const q = clampQty(n);
-
-        setState({
-          items: state.items.map((it) =>
-            getItemKeyFromProduct(it.product) === key ? { ...it, quantity: q } : it,
-          ),
-        });
-      },
-
-      removeItem(productId: string) {
-        ensureHydrated();
-
-        const key = getItemKeyFromId(productId);
-        setState({
-          items: state.items.filter((it) => getItemKeyFromProduct(it.product) !== key),
-        });
-      },
-
-      clear() {
-        ensureHydrated();
-        setState({ items: [] });
-      },
-    };
-  }, []);
+  return useMemo(() => cartActions, []);
 }
