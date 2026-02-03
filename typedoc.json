@@ -1,0 +1,26 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "lib/domain/Product.ts",
+    "lib/domain/Money.ts",
+    "lib/domain/Cart.ts",
+    "lib/cart/store.ts",
+    "lib/cart/rules.ts",
+    "lib/cart/selectors.ts",
+    "lib/cart/persist.ts",
+    "lib/cart/events.ts",
+    "lib/toast/events.ts",
+    "lib/api/http.ts",
+    "lib/config/env.ts",
+    "app/api/products/route.ts",
+    "app/api/products/[[]id[]]/route.ts"
+  ],
+  "tsconfig": "tsconfig.typedoc.json",
+  "out": "docs/typedoc",
+  "readme": "README.md",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "sort": ["source-order"],
+  "categorizeByGroup": true
+}

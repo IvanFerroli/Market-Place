@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export default function CartItemRow({ item }: { item: CartItem }) {
   const { removeItem } = useCartActions();
 
-  const MOTION_MS = 180;
+  const MOTION_MS = 260;
 
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [maxH, setMaxH] = useState<number | undefined>(undefined);
