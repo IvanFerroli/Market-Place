@@ -1,3 +1,12 @@
+/**
+ * Error thrown by HTTP helpers when a request returns a non-2xx status.
+ *
+ * Includes:
+ * - `status` HTTP status code
+ * - `url` request URL
+ * - `method` request method
+ * - `bodyText` best-effort response body (useful for debugging)
+ */
 export class HttpError extends Error {
   status: number;
   url: string;
@@ -21,6 +30,13 @@ async function tryReadText(res: Response): Promise<string | undefined> {
   }
 }
 
+/**
+ * Fetches JSON via GET and returns the parsed value typed as `T`.
+ *
+ * Throws:
+ * - {@link HttpError} when the response is not ok (non-2xx)
+ * - `Error` when the response body is not valid JSON
+ */
 export async function httpGet<T>(url: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(url, { ...init, method: "GET" });
 
@@ -37,8 +53,17 @@ export async function httpGet<T>(url: string, init: RequestInit = {}): Promise<T
 }
 
 /**
- * Try multiple URLs; returns the first ok JSON response.
- * Useful for fallbacks (/api/products, /api/products/:id, etc.)
+ * Tries multiple URLs and returns the first OK JSON response.
+ *
+ * Useful for fallbacks, e.g.:
+ * - prefer a route without `/api` in some environments
+ * - or support alternate endpoints during migrations
+ *
+ * Behavior:
+ * - Iterates `urls` in order
+ * - On non-OK responses, stores a {@link HttpError} and continues
+ * - On fetch exceptions, stores the error and continues
+ * - If all fail, throws the last captured error (or a generic one)
  */
 export async function fetchFirstOkJson<T>(
   urls: string[],
