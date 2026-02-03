@@ -73,6 +73,7 @@ export default function CartItemRow({ item }: { item: CartItem }) {
           />
           <button
             type="button"
+            aria-label={`Remove item ${String(item.product.id)}`}
             className="cp-btn cp-btn-danger h-8 px-3 rounded-full text-xs"
             onClick={handleRemove}
           >
