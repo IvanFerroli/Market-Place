@@ -2,7 +2,14 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Product } from "@/lib/domain/Product";
 
-let cache: Product[] | null = null;
+const cacheBySource = new Map<string, Product[]>();
+
+function normSource(source?: string) {
+  const s = String(source ?? "")
+    .trim()
+    .toLowerCase();
+  return s || "default";
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalize(raw: any): Product {
@@ -33,13 +40,21 @@ function normalize(raw: any): Product {
   };
 }
 
-export async function readProductsJson(): Promise<Product[]> {
-  if (cache) return cache;
+export async function readProductsJson(source?: string): Promise<Product[]> {
+  const key = normSource(source);
+  const cached = cacheBySource.get(key);
+  if (cached) return cached;
 
-  const candidates = [
-    path.join(process.cwd(), "products.json"), // desafio (raiz)
-    path.join(process.cwd(), "public", "data", "products.json"), // fallback (teu repo atual)
-  ];
+  const candidates =
+    key === "blackmarket"
+      ? [
+          path.join(process.cwd(), "blackmarket.json"), // opcional (raiz)
+          path.join(process.cwd(), "public", "data", "blackmarket.json"), // principal
+        ]
+      : [
+          path.join(process.cwd(), "products.json"), // desafio (raiz)
+          path.join(process.cwd(), "public", "data", "products.json"), // fallback (teu repo atual)
+        ];
 
   let raw: string | null = null;
   let lastErr: unknown = null;
@@ -65,6 +80,7 @@ export async function readProductsJson(): Promise<Product[]> {
     throw new Error("products.json must be an array of products");
   }
 
-  cache = data.map(normalize);
-  return cache;
+  const normalized = data.map(normalize);
+  cacheBySource.set(key, normalized);
+  return normalized;
 }

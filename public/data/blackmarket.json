@@ -1,0 +1,110 @@
+[
+  {
+    "id": "bm-001",
+    "name": "Reflex Booster Mk.1",
+    "price": 1299.9,
+    "description": "Low-profile neural mod for burst reaction time. Tuned for short, high-intensity engagements.",
+    "image": "/products/bm-001-reflex-booster-mk1.png",
+    "category": "Neuralware",
+    "stock": 9
+  },
+  {
+    "id": "bm-002",
+    "name": "Synapse Overclock Node",
+    "price": 2199.9,
+    "description": "Firmware-grade neural node that temporarily raises processing bandwidth. Includes thermal throttle safeguards.",
+    "image": "/products/bm-002-synapse-overclock-node.png",
+    "category": "Neuralware",
+    "stock": 6
+  },
+  {
+    "id": "bm-003",
+    "name": "VitaPatch Auto-Seal Kit",
+    "price": 899.9,
+    "description": "Dermal micro-injectors that accelerate clotting and reduce bleed-out risk. Disposable cartridge system.",
+    "image": "/products/bm-003-vitapatch-auto-seal-kit.png",
+    "category": "Biomods",
+    "stock": 14
+  },
+  {
+    "id": "bm-004",
+    "name": "Optic Lumen Array v2",
+    "price": 1599.9,
+    "description": "Enhanced ocular array with improved low-light clarity and glare control. Crisp edges, reduced bloom.",
+    "image": "/products/bm-004-optic-lumen-array-v2.png",
+    "category": "Optics",
+    "stock": 11
+  },
+  {
+    "id": "bm-005",
+    "name": "Spectral Scan Iris",
+    "price": 1899.9,
+    "description": "Multi-spectrum iris overlay for fast material contrast reading. Great for tracking, inspection, and navigation.",
+    "image": "/products/bm-005-spectral-scan-iris.png",
+    "category": "Optics",
+    "stock": 0
+  },
+  {
+    "id": "bm-006",
+    "name": "Dermal Weave Plating",
+    "price": 2499.9,
+    "description": "Lightweight subdermal weave that increases impact dispersion without heavy bulk. Balanced for everyday wear.",
+    "image": "/products/bm-006-dermal-weave-plating.png",
+    "category": "Dermal",
+    "stock": 8
+  },
+  {
+    "id": "bm-007",
+    "name": "Thermo-Regulator Subskin",
+    "price": 1399.9,
+    "description": "Subskin thermal layer that stabilizes body temperature in harsh conditions. Reduces fatigue from heat spikes.",
+    "image": "/products/bm-007-thermo-regulator-subskin.png",
+    "category": "Dermal",
+    "stock": 17
+  },
+  {
+    "id": "bm-008",
+    "name": "GripAssist Tendon Kit",
+    "price": 1199.9,
+    "description": "Micro-actuated tendon assist for steadier grip and reduced hand strain. Calibrated for precision work.",
+    "image": "/products/bm-008-gripassist-tendon-kit.png",
+    "category": "Mobility",
+    "stock": 20
+  },
+  {
+    "id": "bm-009",
+    "name": "StrideSpring Anklet Pair",
+    "price": 1699.9,
+    "description": "Anklet actuators that recycle motion energy for smoother sprints and jumps. Includes silent-step dampeners.",
+    "image": "/products/bm-009-stridespring-anklet-pair.png",
+    "category": "Mobility",
+    "stock": 10
+  },
+  {
+    "id": "bm-010",
+    "name": "AudioShield Cochlear Filter",
+    "price": 699.9,
+    "description": "Cochlear filter that dampens sudden loud peaks while preserving speech clarity. Great for crowded streets.",
+    "image": "/products/bm-010-audioshield-cochlear-filter.png",
+    "category": "Sensory",
+    "stock": 23
+  },
+  {
+    "id": "bm-011",
+    "name": "PulseLink Relay Chip",
+    "price": 999.9,
+    "description": "Short-range relay that stabilizes device pairing and reduces signal jitter. Smooths handoffs between wearables.",
+    "image": "/products/bm-011-pulselink-relay-chip.png",
+    "category": "Utilities",
+    "stock": 12
+  },
+  {
+    "id": "bm-012",
+    "name": "HoloHUD Reticle Projector",
+    "price": 1499.9,
+    "description": "Minimal HUD projector for fast contextual overlays. Includes distraction-safe mode for commuting.",
+    "image": "/products/bm-012-holohud-reticle-projector.png",
+    "category": "Utilities",
+    "stock": 7
+  }
+]
