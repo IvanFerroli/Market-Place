@@ -79,19 +79,20 @@ export async function readProductsJson(source?: string): Promise<Product[]> {
     if (raw) break;
   }
 
-  // 2) fallback Vercel-safe: lê do /public como asset estático
+  // 2) fallback Vercel-safe real: importa o JSON no bundle (sem depender de host/FS/public)
   if (raw == null) {
-    const url = `${getBaseUrl()}/data/${filename}`;
     try {
-      const res = await fetch(url, { next: { revalidate: 300 } });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      if (key === "blackmarket") {
+        const mod = await import("../../public/data/blackmarket.json");
+        raw = JSON.stringify((mod as any).default ?? mod);
+      } else {
+        const mod = await import("../../public/data/products.json");
+        raw = JSON.stringify((mod as any).default ?? mod);
       }
-      raw = JSON.stringify(await res.json());
     } catch (err) {
       throw new Error(
         `Unable to read ${filename}. Tried: ${candidates.join(", ")}. ` +
-          `Fallback fetch failed: ${url}. Last error: ${String(err)}`,
+          `Fallback import failed: public/data/${filename}. Last error: ${String(err)}`,
       );
     }
   }
