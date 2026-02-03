@@ -24,6 +24,9 @@ export default function FilterBar({ categories = [] }: { categories?: string[] }
   const urlSort = sp.get("sort") ?? "";
   const urlInStock = isTruthy(norm(sp.get("inStock")));
 
+  const urlSource = norm(sp.get("source")).toLowerCase();
+  const isBlackmarket = urlSource === "blackmarket";
+
   const [category, setCategory] = useState(urlCategory);
   const [sort, setSort] = useState(urlSort);
 
@@ -192,6 +195,35 @@ export default function FilterBar({ categories = [] }: { categories?: string[] }
           />
           <span className="text-white/80">In stock only</span>
         </label>
+
+        <Button
+          type="button"
+          variant="ghost"
+          aria-pressed={isBlackmarket}
+          onClick={() => {
+            replaceParams((p) => {
+              const next = !isBlackmarket;
+              if (next) p.set("source", "blackmarket");
+              else p.delete("source");
+
+              // evita categoria "fantasma" ao trocar dataset
+              p.delete("category");
+            });
+          }}
+          className={[
+            "cp-btn cp-btn-danger h-9 px-3 rounded-full text-xs",
+            isBlackmarket ? "" : "opacity-70 hover:opacity-100",
+          ].join(" ")}
+          title="Edgerunners black market"
+        >
+          <span
+            className={[
+              "h-2 w-2 rounded-full",
+              isBlackmarket ? "bg-[rgba(197,0,60,0.95)]" : "bg-white/30",
+            ].join(" ")}
+          />
+          Edgerunners black market
+        </Button>
 
         <div className="flex-1" />
 

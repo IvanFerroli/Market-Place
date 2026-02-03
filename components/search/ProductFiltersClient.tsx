@@ -39,12 +39,14 @@ export default function ProductFiltersClient({ products }: { products: Product[]
   const inStockParam = sp.get("inStock") ?? "";
   const inStock = inStockParam === "1" || norm(inStockParam) === "true";
 
+  const source = norm(sp.get("source") ?? "");
+
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // quando mudar qualquer filtro, reseta paginação
+  // quando mudar qualquer filtro (ou dataset/prop), reseta paginação
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [q, category, sort, inStock]);
+  }, [q, category, sort, inStock, source, products]);
 
   const filtered = useMemo(() => {
     const nq = norm(q);

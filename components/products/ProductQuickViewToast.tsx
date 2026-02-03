@@ -9,6 +9,8 @@ import CartQuantityStepper from "@/components/cart/CartQuantityStepper";
 import { useCartSnapshot } from "@/lib/cart/store";
 import { closeToast } from "@/lib/toast/events";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
 import ProductPrice from "@/components/products/ProductPrice";
 import Link from "next/link";
 
@@ -17,6 +19,13 @@ export default function ProductQuickViewToast({ product }: { product: Product })
 
   const cart = useCartSnapshot();
   const productId = String(product.id);
+
+  const sp = useSearchParams();
+  const source = (sp?.get("source") ?? "").trim().toLowerCase();
+
+  const pdpHref = source
+    ? `/product/${product.id}?source=${encodeURIComponent(source)}`
+    : `/product/${product.id}`;
 
   const qtyInCart = useMemo(() => {
     const hit = cart.items.find((it) => String(it.product.id) === productId);
@@ -90,7 +99,7 @@ export default function ProductQuickViewToast({ product }: { product: Product })
 
             {/* CTA secundário (PDP) */}
             <Link
-              href={`/product/${product.id}`}
+              href={pdpHref}
               onClick={() => closeToast(`product:${product.id}`)}
               className="cp-btn cp-btn-ghost h-10 w-full rounded-full text-sm !hidden md:!flex items-center justify-center"
               aria-label={`View details for ${product.name}`}

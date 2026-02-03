@@ -5,12 +5,20 @@ import CartButton from "@/components/cart/CartButton";
 import CartQuantityStepper from "@/components/cart/CartQuantityStepper";
 import { useCartSnapshot } from "@/lib/cart/store";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function ProductPdpCart({ product }: { product: Product }) {
   const [justAdded, setJustAdded] = useState(false);
 
   const cart = useCartSnapshot();
   const productId = String(product.id);
+
+  const sp = useSearchParams();
+  const source = (sp.get("source") ?? "").trim().toLowerCase();
+
+  const pdpHref = source
+    ? `/product/${product.id}?source=${encodeURIComponent(source)}`
+    : `/product/${product.id}`;
 
   const qtyInCart = useMemo(() => {
     const hit = cart.items.find((it) => String(it.product.id) === productId);
