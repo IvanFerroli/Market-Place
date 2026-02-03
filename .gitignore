@@ -66,3 +66,6 @@ build
 # Playwright
 playwright-report/
 test-results/
+
+# TypeDoc (generated)
+docs/typedoc/
