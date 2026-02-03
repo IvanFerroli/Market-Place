@@ -7,6 +7,12 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  testMatch: ["<rootDir>/tests/unit/**/*.test.ts", "<rootDir>/tests/unit/**/*.test.tsx"],
+  testPathIgnorePatterns: [
+    "<rootDir>/tests/e2e/",
+    "<rootDir>/playwright-report/",
+    "<rootDir>/test-results/",
+  ],
 
   // alias do tsconfig
   moduleNameMapper: {
