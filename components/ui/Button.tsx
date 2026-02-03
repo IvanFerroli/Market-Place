@@ -1,27 +1,23 @@
 "use client";
 
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
+
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: "solid" | "ghost";
+};
 
 export default function Button({
   children,
-  onClick,
   variant = "solid",
   className,
   type = "button",
-  disabled = false,
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  type?: "button" | "submit";
-  variant?: "solid" | "ghost";
-  className?: string;
-  disabled?: boolean;
-}) {
+  ...props
+}: ButtonProps & { children: ReactNode }) {
   return (
     <button
       type={type}
-      onClick={onClick}
-      disabled={disabled}
+      {...props}
       className={cn(
         // base (global)
         "cp-btn disabled:opacity-50 disabled:cursor-not-allowed",
