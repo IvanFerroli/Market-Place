@@ -26,12 +26,14 @@ export function loadCart(): Cart {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return { items: [] };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parsed = JSON.parse(raw) as any;
     const items = Array.isArray(parsed?.items) ? parsed.items : [];
 
     // valida shape mínimo + tolerância a lixo no storage
     const safeItems = items
       .filter(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (it: any) =>
           it &&
           typeof it === "object" &&
@@ -39,6 +41,7 @@ export function loadCart(): Cart {
           typeof it.product === "object" &&
           "quantity" in it,
       )
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((it: any) => {
         const rawQty = Number(it.quantity);
         const quantity = Number.isFinite(rawQty) && rawQty > 0 ? Math.floor(rawQty) : 1;

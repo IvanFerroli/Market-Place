@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 declare global {
   interface Window {
     botpress?: {
-      init: (config: any) => void;
+      init: (config: unknown) => void;
       open: () => void;
       close: () => void;
       toggle: () => void;

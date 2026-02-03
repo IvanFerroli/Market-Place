@@ -80,8 +80,9 @@ export function subscribeToToasts(handlers: {
   };
 
   const onClose = (e: Event) => {
-    const ce = e as CustomEvent;
-    const key = String((ce as any).detail?.key ?? "");
+    const ce = e as CustomEvent<{ key?: string }>;
+    const key = String(ce.detail?.key ?? "");
+
     if (key) handlers.onClose(key);
   };
 

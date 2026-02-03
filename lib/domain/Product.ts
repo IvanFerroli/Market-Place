@@ -23,6 +23,7 @@ export type Product = {
  * passes basic sanity checks (non-empty id, non-negative cents/stock, etc).
  */
 export function isProduct(v: unknown): v is Product {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = v as any;
   if (!p || typeof p !== "object") return false;
 

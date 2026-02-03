@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import "./globals.css";
 import Header from "@/components/layout/Header";
@@ -66,7 +67,9 @@ export default async function RootLayout({
       <body className="min-h-screen cp-body">
         <ToastProvider>
           <CartToastProvider>
-            <Header categories={categories} />
+            <Suspense fallback={null}>
+              <Header categories={categories} />
+            </Suspense>
 
             <main className="min-h-[70vh] pt-20">{children}</main>
             <Footer />

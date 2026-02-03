@@ -4,6 +4,7 @@ import type { Product } from "@/lib/domain/Product";
 
 let cache: Product[] | null = null;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalize(raw: any): Product {
   if (raw == null) throw new Error("Invalid product: null/undefined");
 

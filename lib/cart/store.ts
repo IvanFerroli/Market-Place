@@ -70,16 +70,19 @@ function clampQty(qty: number) {
 }
 
 function normalizeCart(input: unknown): State {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const coerceItems = (arr: any[]): State["items"] =>
     arr
       .filter((it) => it && it.product)
       .map((it) => ({
         product: it.product as Product,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         quantity: clampQty((it as any).quantity ?? (it as any).qty ?? 1),
       }));
 
   if (Array.isArray(input)) return { items: coerceItems(input) };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const maybe = input as any;
   if (maybe && Array.isArray(maybe.items)) return { items: coerceItems(maybe.items) };
 

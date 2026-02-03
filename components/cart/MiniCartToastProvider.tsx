@@ -71,7 +71,7 @@ export default function MiniCartToastProvider({
 
     const onToastClose = (e: Event) => {
       const ce = e as CustomEvent<{ key?: string }>;
-      const k = String((ce as any).detail?.key ?? "");
+      const k = String(ce.detail?.key ?? "");
       if (k === TOAST_KEY) setIsOpen(false);
     };
 

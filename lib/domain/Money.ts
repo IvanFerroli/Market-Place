@@ -45,6 +45,7 @@ export function makeMoney(currency: MoneyCurrency, amountCents: number): Money {
  */
 export function isMoney(v: unknown): v is Money {
   if (!v || typeof v !== "object") return false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const obj = v as any;
   return (
     MONEY_CURRENCIES.includes(obj.currency) &&

@@ -32,6 +32,7 @@ export type Cart = {
  * - quantity is finite and > 0
  */
 export function isCartItem(v: unknown): v is CartItem {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const it = v as any;
   if (!it || typeof it !== "object") return false;
   if (!isProduct(it.product)) return false;
@@ -51,6 +52,7 @@ export function isCartItem(v: unknown): v is CartItem {
  * - every element passes {@link isCartItem}
  */
 export function isCart(v: unknown): v is Cart {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const c = v as any;
   if (!c || typeof c !== "object") return false;
   if (!Array.isArray(c.items)) return false;
