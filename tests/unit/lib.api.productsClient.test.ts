@@ -1,176 +1,240 @@
-jest.mock("@/lib/api/http", () => ({
-  httpGet: jest.fn(),
-}));
+type Deferred<T> = {
+  promise: Promise<T>;
+  resolve: (v: T) => void;
+  reject: (e?: any) => void;
+};
+
+function deferred<T>(): Deferred<T> {
+  let resolve!: (v: T) => void;
+  let reject!: (e?: any) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+function loadClient(httpGetMock: jest.Mock) {
+  jest.resetModules();
+
+  // productsClient importa "./http" -> mesmo arquivo físico que "../../lib/api/http"
+  jest.doMock("../../lib/api/http", () => ({
+    httpGet: (...args: any[]) => httpGetMock(...args),
+  }));
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  return require("../../lib/api/productsClient") as typeof import("../../lib/api/productsClient");
+}
 
 describe("lib/api/productsClient", () => {
-  beforeEach(() => {
-    jest.resetModules();
+  afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
-  test("fetchProducts: usa cache dentro do TTL e não refaz request", async () => {
-    let now = 1_000_000;
-    const nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+  describe("fetchProducts", () => {
+    test("faz GET /api/products e cacheia dentro do TTL", async () => {
+      const payload = { products: [{ id: "p1" }] } as any;
+      const httpGetMock = jest.fn().mockResolvedValueOnce(payload);
+      const { fetchProducts } = loadClient(httpGetMock);
 
-    const { httpGet } = await import("@/lib/api/http");
-    const httpGetMock = httpGet as unknown as jest.MockedFunction<any>;
+      const now = jest.spyOn(Date, "now");
+      now.mockReturnValue(1_000);
 
-    const payload = { products: [{ id: "p1" }] } as any;
-    httpGetMock.mockResolvedValueOnce(payload);
+      const r1 = await fetchProducts();
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+      expect(httpGetMock).toHaveBeenCalledWith("/api/products");
+      expect(r1).toBe(payload);
 
-    const { fetchProducts } = await import("@/lib/api/productsClient");
+      now.mockReturnValue(10_000);
+      const r2 = await fetchProducts();
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+      expect(r2).toBe(r1); // mesma referência (cache)
+    });
 
-    const a = await fetchProducts();
-    const b = await fetchProducts();
+    test("expirando TTL, refaz request", async () => {
+      const payload1 = { products: [{ id: "p1" }] } as any;
+      const payload2 = { products: [{ id: "p2" }] } as any;
 
-    expect(a).toBe(payload);
-    expect(b).toBe(payload);
-    expect(httpGetMock).toHaveBeenCalledTimes(1);
-    expect(httpGetMock).toHaveBeenCalledWith("/api/products");
+      const httpGetMock = jest.fn()
+        .mockResolvedValueOnce(payload1)
+        .mockResolvedValueOnce(payload2);
 
-    nowSpy.mockRestore();
+      const { fetchProducts } = loadClient(httpGetMock);
+
+      const now = jest.spyOn(Date, "now");
+      now.mockReturnValue(1_000);
+
+      const r1 = await fetchProducts();
+      expect(r1).toBe(payload1);
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+
+      // TTL_PRODUCTS_MS = 60_000
+      now.mockReturnValue(1_000 + 60_001);
+
+      const r2 = await fetchProducts();
+      expect(r2).toBe(payload2);
+      expect(httpGetMock).toHaveBeenCalledTimes(2);
+    });
+
+    test("de-dupe de in-flight: 2 chamadas antes de resolver = 1 request", async () => {
+      const d = deferred<any>();
+      const payload = { products: [{ id: "pX" }] } as any;
+
+      const httpGetMock = jest.fn().mockReturnValueOnce(d.promise);
+      const { fetchProducts } = loadClient(httpGetMock);
+
+      jest.spyOn(Date, "now").mockReturnValue(1_000);
+
+      const p1 = fetchProducts();
+      const p2 = fetchProducts();
+
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+      expect(httpGetMock).toHaveBeenCalledWith("/api/products");
+
+      d.resolve(payload);
+
+      const [r1, r2] = await Promise.all([p1, p2]);
+      expect(r1).toStrictEqual(payload);
+      expect(r2).toStrictEqual(payload);
+
+      // depois de resolver, cache vale (sem novo request)
+      const r3 = await fetchProducts();
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+      expect(r3).toBe(payload);
+    });
+
+    test("se in-flight falhar, limpa e permite retry", async () => {
+      const d = deferred<any>();
+      const httpGetMock = jest.fn().mockReturnValueOnce(d.promise);
+      const { fetchProducts } = loadClient(httpGetMock);
+
+      jest.spyOn(Date, "now").mockReturnValue(1_000);
+
+      const p1 = fetchProducts();
+      const p2 = fetchProducts();
+
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+
+      d.reject(new Error("boom"));
+
+      await expect(p1).rejects.toThrow("boom");
+      await expect(p2).rejects.toThrow("boom");
+
+      httpGetMock.mockResolvedValueOnce({ products: [] });
+
+      const r = await fetchProducts();
+      expect(httpGetMock).toHaveBeenCalledTimes(2);
+      expect(r).toStrictEqual({ products: [] });
+    });
   });
 
-  test("fetchProducts: de-dupe de in-flight (2 chamadas antes de resolver = 1 request)", async () => {
-    let now = 2_000_000;
-    const nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+  describe("fetchProductById", () => {
+    test("erro quando id vazio", async () => {
+      const httpGetMock = jest.fn();
+      const { fetchProductById } = loadClient(httpGetMock);
 
-    const { httpGet } = await import("@/lib/api/http");
-    const httpGetMock = httpGet as unknown as jest.MockedFunction<any>;
+      await expect(fetchProductById("")).rejects.toThrow("fetchProductById: missing id");
+      await expect(fetchProductById("   ")).rejects.toThrow("fetchProductById: missing id");
+      expect(httpGetMock).toHaveBeenCalledTimes(0);
+    });
 
-    let resolve!: (v: any) => void;
-    const deferred = new Promise<any>((r) => (resolve = r));
+    test("faz GET /api/products/:id com encodeURIComponent", async () => {
+      const payload = { product: { id: "p 1" } } as any;
+      const httpGetMock = jest.fn().mockResolvedValueOnce(payload);
+      const { fetchProductById } = loadClient(httpGetMock);
 
-    httpGetMock.mockReturnValueOnce(deferred);
+      jest.spyOn(Date, "now").mockReturnValue(1_000);
 
-    const { fetchProducts } = await import("@/lib/api/productsClient");
+      const r = await fetchProductById("p 1");
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+      expect(httpGetMock).toHaveBeenCalledWith("/api/products/p%201");
+      expect(r).toBe(payload);
+    });
 
-    const p1 = fetchProducts();
-    const p2 = fetchProducts();
+    test("cache por id dentro do TTL", async () => {
+      const payload = { product: { id: "abc" } } as any;
+      const httpGetMock = jest.fn().mockResolvedValueOnce(payload);
+      const { fetchProductById } = loadClient(httpGetMock);
 
-    expect(httpGetMock).toHaveBeenCalledTimes(1);
+      const now = jest.spyOn(Date, "now");
+      now.mockReturnValue(1_000);
 
-    const payload = { products: [{ id: "p2" }] } as any;
-    resolve(payload);
+      const r1 = await fetchProductById("abc");
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
 
-    await expect(p1).resolves.toBe(payload);
-    await expect(p2).resolves.toBe(payload);
+      now.mockReturnValue(10_000);
+      const r2 = await fetchProductById("abc");
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+      expect(r2).toBe(r1);
+    });
 
-    nowSpy.mockRestore();
-  });
+    test("de-dupe de in-flight por id (inclui trim)", async () => {
+      const d = deferred<any>();
+      const payload = { product: { id: "p 1" } } as any;
 
-  test("fetchProducts: após expirar TTL, refaz request", async () => {
-    let now = 3_000_000;
-    const nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+      const httpGetMock = jest.fn().mockReturnValueOnce(d.promise);
+      const { fetchProductById } = loadClient(httpGetMock);
 
-    const { httpGet } = await import("@/lib/api/http");
-    const httpGetMock = httpGet as unknown as jest.MockedFunction<any>;
+      jest.spyOn(Date, "now").mockReturnValue(1_000);
 
-    const aPayload = { products: [{ id: "a" }] } as any;
-    const bPayload = { products: [{ id: "b" }] } as any;
+      const p1 = fetchProductById("p 1");
+      const p2 = fetchProductById("   p 1   ");
 
-    httpGetMock.mockResolvedValueOnce(aPayload).mockResolvedValueOnce(bPayload);
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+      expect(httpGetMock).toHaveBeenCalledWith("/api/products/p%201");
 
-    const { fetchProducts } = await import("@/lib/api/productsClient");
+      d.resolve(payload);
 
-    const a = await fetchProducts();
-    expect(a).toBe(aPayload);
+      const [r1, r2] = await Promise.all([p1, p2]);
+      expect(r1).toStrictEqual(payload);
+      expect(r2).toStrictEqual(payload);
 
-    now += 60_000 + 1; // TTL_PRODUCTS_MS + 1
+      // depois, cache vale (sem novo request)
+      const r3 = await fetchProductById("p 1");
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
+      expect(r3).toBe(payload);
+    });
 
-    const b = await fetchProducts();
-    expect(b).toBe(bPayload);
+    test("ids diferentes fazem requests diferentes", async () => {
+      const httpGetMock = jest
+        .fn()
+        .mockResolvedValueOnce({ product: { id: "a" } })
+        .mockResolvedValueOnce({ product: { id: "b" } });
 
-    expect(httpGetMock).toHaveBeenCalledTimes(2);
-    expect(httpGetMock.mock.calls[0][0]).toBe("/api/products");
-    expect(httpGetMock.mock.calls[1][0]).toBe("/api/products");
+      const { fetchProductById } = loadClient(httpGetMock);
 
-    nowSpy.mockRestore();
-  });
+      jest.spyOn(Date, "now").mockReturnValue(1_000);
 
-  test("fetchProductById: valida id (erro em vazio)", async () => {
-    const { fetchProductById } = await import("@/lib/api/productsClient");
-    await expect(fetchProductById("")).rejects.toThrow("missing id");
-    await expect(fetchProductById("   ")).rejects.toThrow("missing id");
-  });
+      await fetchProductById("a");
+      await fetchProductById("b");
 
-  test("fetchProductById: encode no path + cache por key trimada", async () => {
-    let now = 4_000_000;
-    const nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+      expect(httpGetMock).toHaveBeenCalledTimes(2);
+      expect(httpGetMock).toHaveBeenNthCalledWith(1, "/api/products/a");
+      expect(httpGetMock).toHaveBeenNthCalledWith(2, "/api/products/b");
+    });
 
-    const { httpGet } = await import("@/lib/api/http");
-    const httpGetMock = httpGet as unknown as jest.MockedFunction<any>;
+    test("se in-flight por id falhar, remove do map e permite retry", async () => {
+      const d = deferred<any>();
+      const httpGetMock = jest.fn().mockReturnValueOnce(d.promise);
+      const { fetchProductById } = loadClient(httpGetMock);
 
-    const payload = { product: { id: "x" } } as any;
-    httpGetMock.mockResolvedValueOnce(payload);
+      jest.spyOn(Date, "now").mockReturnValue(1_000);
 
-    const { fetchProductById } = await import("@/lib/api/productsClient");
+      const p1 = fetchProductById("x");
+      const p2 = fetchProductById("x");
 
-    const a = await fetchProductById("  abc/def  ");
-    const b = await fetchProductById("abc/def");
+      expect(httpGetMock).toHaveBeenCalledTimes(1);
 
-    expect(a).toBe(payload);
-    expect(b).toBe(payload);
-    expect(httpGetMock).toHaveBeenCalledTimes(1);
-    expect(httpGetMock).toHaveBeenCalledWith("/api/products/abc%2Fdef");
+      d.reject(new Error("nope"));
+      await expect(p1).rejects.toThrow("nope");
+      await expect(p2).rejects.toThrow("nope");
 
-    nowSpy.mockRestore();
-  });
+      httpGetMock.mockResolvedValueOnce({ product: { id: "x" } });
 
-  test("fetchProductById: de-dupe de in-flight por id", async () => {
-    let now = 5_000_000;
-    const nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
-
-    const { httpGet } = await import("@/lib/api/http");
-    const httpGetMock = httpGet as unknown as jest.MockedFunction<any>;
-
-    let resolve!: (v: any) => void;
-    const deferred = new Promise<any>((r) => (resolve = r));
-    httpGetMock.mockReturnValueOnce(deferred);
-
-    const { fetchProductById } = await import("@/lib/api/productsClient");
-
-    const p1 = fetchProductById("p 1");
-    const p2 = fetchProductById("p 1");
-
-    expect(httpGetMock).toHaveBeenCalledTimes(1);
-    expect(httpGetMock).toHaveBeenCalledWith("/api/products/p%201");
-
-    const payload = { product: { id: "p 1" } } as any;
-    resolve(payload);
-
-    await expect(p1).resolves.toBe(payload);
-    await expect(p2).resolves.toBe(payload);
-
-    nowSpy.mockRestore();
-  });
-
-  test("fetchProductById: após expirar TTL, refaz request", async () => {
-    let now = 6_000_000;
-    const nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
-
-    const { httpGet } = await import("@/lib/api/http");
-    const httpGetMock = httpGet as unknown as jest.MockedFunction<any>;
-
-    const aPayload = { product: { id: "1", v: "a" } } as any;
-    const bPayload = { product: { id: "1", v: "b" } } as any;
-
-    httpGetMock.mockResolvedValueOnce(aPayload).mockResolvedValueOnce(bPayload);
-
-    const { fetchProductById } = await import("@/lib/api/productsClient");
-
-    const a = await fetchProductById("1");
-    expect(a).toBe(aPayload);
-
-    now += 300_000 + 1; // TTL_PRODUCT_MS + 1
-
-    const b = await fetchProductById("1");
-    expect(b).toBe(bPayload);
-
-    expect(httpGetMock).toHaveBeenCalledTimes(2);
-    expect(httpGetMock.mock.calls[0][0]).toBe("/api/products/1");
-    expect(httpGetMock.mock.calls[1][0]).toBe("/api/products/1");
-
-    nowSpy.mockRestore();
+      const r = await fetchProductById("x");
+      expect(httpGetMock).toHaveBeenCalledTimes(2);
+      expect(r).toStrictEqual({ product: { id: "x" } });
+    });
   });
 });
