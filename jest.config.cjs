@@ -7,21 +7,26 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-  testMatch: ["<rootDir>/tests/unit/**/*.test.ts", "<rootDir>/tests/unit/**/*.test.tsx"],
+
+  // pega .test.ts e .test.tsx
+  testMatch: ["<rootDir>/tests/unit/**/*.test.{ts,tsx}"],
+
+  // ignores (unificado: antes tava duplicado e sobrescrevia)
   testPathIgnorePatterns: [
+    "<rootDir>/.next/",
+    "<rootDir>/node_modules/",
     "<rootDir>/tests/e2e/",
     "<rootDir>/playwright-report/",
     "<rootDir>/test-results/",
   ],
 
-  // alias do tsconfig
+  // alias do tsconfig + mocks de style
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
   },
 
-  testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
-
+  // coverage
   collectCoverageFrom: [
     "lib/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
@@ -37,6 +42,9 @@ const customJestConfig = {
   coveragePathIgnorePatterns: [
     "<rootDir>/app/api/", // pode remover isso quando formos testar API routes
   ],
+
+  coverageDirectory: "<rootDir>/coverage",
+  coverageReporters: ["text-summary", "html", "lcov"],
 };
 
 module.exports = createJestConfig(customJestConfig);
