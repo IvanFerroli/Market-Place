@@ -7,6 +7,9 @@ export default function CartBadge() {
   const cart = useCartSnapshot();
   const qty = cart.items.reduce((sum, it) => sum + it.quantity, 0);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const prevQtyRef = useRef(qty);
   const [pulse, setPulse] = useState(false);
 
@@ -19,6 +22,7 @@ export default function CartBadge() {
     return () => window.clearTimeout(id);
   }, [qty]);
 
+  if (!mounted) return null;
   if (qty <= 0) return null;
 
   return (

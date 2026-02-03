@@ -4,7 +4,7 @@
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import CartButton from "@/components/cart/CartButton";
-import { openCart } from "@/lib/cart/events";
+import { openCart, toggleCart } from "@/lib/cart/events";
 
 const mockAddItem = jest.fn();
 

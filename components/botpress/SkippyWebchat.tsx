@@ -119,7 +119,7 @@ export default function SkippyWebchat() {
         aria-label="Toggle Skippy chat"
         onClick={toggleChat}
         className={[
-          "fixed bottom-6 right-6 z-[2147483647]",
+          "fixed bottom-6 right-6 z-[9999]",
           "h-16 w-16 rounded-full",
           "cp-glass-strong cp-pill",
           "flex items-center justify-center",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { openCart } from "@/lib/cart/events";
+import { openCart, toggleCart } from "@/lib/cart/events";
 import { asId } from "@/lib/utils/ids";
 
 import Button from "@/components/ui/Button";
@@ -50,7 +50,7 @@ export default function CartButton({ product, openCartOnAdd = true, onAdded }: P
   }
 
   return (
-    <Button variant="ghost" onClick={() => openCart({ source: "header" })}>
+    <Button variant="ghost" onClick={() => toggleCart()}>
       Cart
     </Button>
   );
