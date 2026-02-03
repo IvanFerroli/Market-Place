@@ -149,6 +149,17 @@ body {
   -webkit-backdrop-filter: blur(20px);
 }
 
+.cp-edge-soft {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: var(--cp-shadow);
+}
+
+/* Toast/Drawer: mantém o glass, mas “apaga” o highlight da borda */
+.cp-edge-soft {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: var(--cp-shadow);
+}
+
 .cp-pill {
   border-radius: 9999px;
   overflow: hidden;
@@ -549,4 +560,30 @@ body.route-product-fullscreen main {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   min-height: 100svh;
+}
+
+/* Scrollbar discreto (WebKit + Firefox) */
+.cp-scrollbar-soft {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent; /* thumb / track */
+}
+
+.cp-scrollbar-soft::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cp-scrollbar-soft::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cp-scrollbar-soft::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  border: 2px solid transparent; /* dá “respiro” */
+  background-clip: content-box;
+}
+
+.cp-scrollbar-soft::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: content-box;
 }

@@ -100,7 +100,7 @@ export default function CartToast({ productId }: Props) {
   return (
     <div
       className={[
-        "relative w-[380px] max-w-[92vw] cp-glass-strong rounded-3xl overflow-hidden",
+        "relative w-[380px] max-w-[92vw] cp-glass-strong cp-edge-soft rounded-3xl overflow-hidden",
         "transform-gpu will-change-transform will-change-opacity transition-[transform,opacity] duration-200 ease-out",
         "motion-reduce:transition-none motion-reduce:transform-none",
         cardPop ? "opacity-95 scale-[0.99]" : "opacity-100 scale-100",
@@ -108,7 +108,6 @@ export default function CartToast({ productId }: Props) {
     >
       {/* header */}
       <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3 border-b border-white/10">
-        <div className="cp-topline" />
 
         <div className="min-w-0">
           <div className="text-sm font-semibold text-white/95">Your cart</div>
@@ -150,7 +149,7 @@ export default function CartToast({ productId }: Props) {
         ) : (
           <div className="space-y-4">
             {/* items (scroll if many) */}
-            <div className="max-h-[280px] overflow-auto pr-1 space-y-3">
+            <div className="max-h-[280px] overflow-auto pr-1 space-y-3 cp-scrollbar-soft">
               {cart.items.map((it) => (
                 <CartItemRow key={String(it.product.id)} item={it} />
               ))}

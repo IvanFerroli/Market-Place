@@ -24,7 +24,7 @@ export default function ProductQuickViewToast({ product }: { product: Product })
   }, [cart.items, productId]);
 
   return (
-    <div className="cp-glass-strong overflow-hidden rounded-3xl">
+    <div className="cp-glass-strong cp-edge-soft overflow-hidden rounded-3xl">
       {/* header */}
       <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
         <div className="min-w-0">

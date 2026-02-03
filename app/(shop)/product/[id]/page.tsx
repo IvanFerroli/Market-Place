@@ -5,8 +5,6 @@ import ProductPrice from "@/components/products/ProductPrice";
 import { getProductById } from "@/lib/data/productsStore";
 import Badge from "@/components/ui/Badge";
 import ProductPdpCart from "@/components/products/ProductPdpCart";
-import ProductImage from "@/components/products/ProductImage";
-import { use } from "react";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -21,8 +19,8 @@ export default async function ProductPage({ params }: PageProps) {
   const inStock = (product.stock ?? 0) > 0;
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
-      <div className="h-[100svh] w-full">
+    <div className="fixed inset-[35px] overflow-hidden">
+      <div className="h-full w-full">
         <div className="cp-card group h-full w-full overflow-hidden rounded-none md:rounded-3xl">
           <div className="grid h-full grid-rows-[42svh_1fr] md:grid-rows-1 md:grid-cols-2 gap-0">
             {/* media (full height) */}
