@@ -260,6 +260,86 @@ body {
 }
 
 /* =========================
+   Motion helpers (cp-anim-*)
+   ========================= */
+
+/* keyframes curtos e “secos” (cyberpunk UI), sem bounce exagerado */
+@keyframes cp-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cp-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cp-slide-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cp-slide-right-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* classes prontas (use em wrappers: toast/cart/item rows) */
+.cp-anim-pop-in {
+  animation: cp-pop-in 200ms ease-out both;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.cp-anim-fade-in {
+  animation: cp-fade-in 180ms ease-out both;
+  will-change: opacity;
+}
+
+.cp-anim-slide-up-in {
+  animation: cp-slide-up-in 200ms ease-out both;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.cp-anim-slide-right-in {
+  animation: cp-slide-right-in 200ms ease-out both;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* helper pra transição suave (quando você controla enter/leave por classe) */
+.cp-anim-smooth {
+  transition:
+    transform 200ms ease-out,
+    opacity 200ms ease-out;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* =========================
    Header progressbar
    ========================= */
 .cp-progressTrack {
@@ -398,6 +478,44 @@ body {
     transparent 6px
   );
   mix-blend-mode: overlay;
+}
+
+/* =========================
+   Reduced motion (a11y)
+   ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  /* escopo no app pra evitar mexer em coisas fora */
+  .cp-body,
+  .cp-body * {
+    scroll-behavior: auto !important;
+  }
+
+  /* corta transições/anim. do tema sem matar estilos */
+  .cp-body *,
+  .cp-body *::before,
+  .cp-body *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* especificamente nossas classes/elementos “motion-heavy” */
+  .cp-anim-pop-in,
+  .cp-anim-fade-in,
+  .cp-anim-slide-up-in,
+  .cp-anim-slide-right-in {
+    animation: none !important;
+  }
+
+  .cp-anim-smooth,
+  .cp-btn,
+  .cp-card,
+  .cp-navlink,
+  .cp-progressBar {
+    transition: none !important;
+    transform: none !important;
+  }
 }
 
 /* =========================
