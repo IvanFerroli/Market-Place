@@ -10,6 +10,7 @@ import { useCartSnapshot } from "@/lib/cart/store";
 import { closeToast } from "@/lib/toast/events";
 import { useMemo, useState } from "react";
 import ProductPrice from "@/components/products/ProductPrice";
+import Link from "next/link";
 
 export default function ProductQuickViewToast({ product }: { product: Product }) {
   const [justAdded, setJustAdded] = useState(false);
@@ -86,6 +87,16 @@ export default function ProductQuickViewToast({ product }: { product: Product })
                 }}
               />
             )}
+
+            {/* CTA secundário (PDP) */}
+            <Link
+              href={`/product/${product.id}`}
+              onClick={() => closeToast(`product:${product.id}`)}
+              className="cp-btn cp-btn-ghost h-10 w-full rounded-full text-sm !hidden md:!flex items-center justify-center"
+              aria-label={`View details for ${product.name}`}
+            >
+              View details
+            </Link>
 
             {justAdded ? (
               <div className="text-xs text-white/70">Added to cart ✓</div>

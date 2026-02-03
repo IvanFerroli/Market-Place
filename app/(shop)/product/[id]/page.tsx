@@ -1,10 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { notFound } from "next/navigation";
 import ProductPrice from "@/components/products/ProductPrice";
-import AddToCartButton from "@/components/cart/CartButton";
 import { getProductById } from "@/lib/data/productsStore";
+import Badge from "@/components/ui/Badge";
+import ProductPdpCart from "@/components/products/ProductPdpCart";
+import ProductImage from "@/components/products/ProductImage";
+import { use } from "react";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -16,40 +18,68 @@ export default async function ProductPage({ params }: PageProps) {
 
   if (!product) return notFound();
 
+  const inStock = (product.stock ?? 0) > 0;
+
   return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
-        <Image
-          src={product.image || "https://picsum.photos/900"}
-          alt={product.name}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 50vw"
-          priority
-        />
-      </div>
+    <div className="fixed inset-0 overflow-hidden">
+      <div className="h-[100svh] w-full">
+        <div className="cp-card group h-full w-full overflow-hidden rounded-none md:rounded-3xl">
+          <div className="grid h-full grid-rows-[42svh_1fr] md:grid-rows-1 md:grid-cols-2 gap-0">
+            {/* media (full height) */}
+            <div className="relative w-full h-full bg-white/5">
+              <img
+                src={product.image || "https://picsum.photos/900"}
+                alt={product.name}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            </div>
 
-      <div className="space-y-4">
-        <div className="mb-4">
-          <Link
-            href="/?restore=1"
-            scroll={false}
-            className="text-sm text-gray-600 hover:text-black"
-          >
-            ← Back to products
-          </Link>
-        </div>
-        <h1 className="text-3xl font-semibold">{product.name}</h1>
-        <ProductPrice value={product.priceCents} />
-        <p className="text-gray-700">{product.description}</p>
+            {/* content */}
+            <div className="min-h-0 p-6 flex flex-col">
+              <div className="mb-4">
+                <Link
+                  href="/?restore=1"
+                  scroll={false}
+                  className="cp-navlink text-sm"
+                  aria-label="Back to products"
+                >
+                  ← Back to products
+                </Link>
+              </div>
 
-        <div className="text-sm text-gray-600">
-          Category: <span className="font-medium">{product.category}</span> • Stock:{" "}
-          <span className="font-medium">{product.stock}</span>
-        </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="cp-kicker">Cyberware</div>
+                  <h1 className="cp-text mt-1 text-3xl font-semibold leading-tight truncate">
+                    {product.name}
+                  </h1>
+                </div>
 
-        <div className="pt-2">
-          <AddToCartButton product={product} />
+                <div className="shrink-0 text-right">
+                  <div className="cp-price text-sm">
+                    <ProductPrice value={product.priceCents} />
+                  </div>
+                  <div className="cp-dim text-[11px] mt-0.5">
+                    {inStock ? "in stock" : "out of stock"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Badge>{product.category}</Badge>
+                <Badge>Stock: {product.stock}</Badge>
+              </div>
+
+              <p className="mt-4 cp-muted text-sm leading-relaxed line-clamp-6">
+                {product.description}
+              </p>
+
+              <div className="mt-auto pt-4 border-t border-white/10">
+                <ProductPdpCart product={product} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

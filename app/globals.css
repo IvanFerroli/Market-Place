@@ -533,3 +533,20 @@ body {
 [data-testid="bpw-floating-button"] {
   display: none !important;
 }
+
+/* Route-only chrome off: aplicado só enquanto /product/* está montado */
+body.route-product-fullscreen header,
+body.route-product-fullscreen footer {
+  display: none !important;
+}
+
+body.route-product-fullscreen {
+  overflow: hidden;
+}
+
+/* se teu layout global empurra o main por causa do header/footer */
+body.route-product-fullscreen main {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 100svh;
+}
