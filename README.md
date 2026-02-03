@@ -5,7 +5,8 @@ Mini e-commerce funcional construído para o desafio de Frontend Junior da Uncod
 - **Repo:** https://github.com/IvanFerroli/Market-Place
 - **Deploy (Vercel):** https://ncart.vercel.app/
 
-## **Transparência:** 
+## **Transparência:**
+
 usei IA como apoio em partes do desenvolvimento (ideação, debug e documentação), com validação manual e cobertura via testes (unit/e2e) para garantir consistência.
 
 ## ✨ O que tem aqui (highlights)
@@ -45,6 +46,25 @@ usei IA como apoio em partes do desenvolvimento (ideação, debug e documentaç�
 - **Extras (diferenciais do desafio)**
   - Integração opcional de chatbot via Botpress (Skippy)
   - SEO básico (metatags + JSON-LD + sitemap)
+  - **BlackMarket mode (opcional):** catálogo alternativo + variação visual (darker) para demonstrar state/UX e troca segura de dataset
+
+    <!-- IMAGE: BlackMarket mode toggle + catálogo alternativo -->
+
+    ![BlackMarket mode](docs/images/blackmarket-mode.png)
+
+### 🧪 Bonus: BlackMarket mode (opcional)
+
+Incluí um _BlackMarket mode_ como extra (não exigido pelo desafio): um **toggle** que ativa um **catálogo alternativo** e uma **variação visual** levemente mais “dark”.
+
+**Por que existe**
+
+- Mostrar **isolamento de feature** (não polui o core do carrinho/API).
+- Demonstrar **troca segura de dataset** (sem quebrar UX / tipagem / regras).
+- Dar um “tempero” visual coerente com o tema (_Curated Cyberware_).
+
+**Non-goal**
+
+- Não é requisito de negócio nem “decisão de arquitetura”: é **flavor** intencional, mantido simples e isolado.
 
 ---
 
@@ -282,7 +302,7 @@ components/
   products/    # card, carousel, quick view
   search/      # search bar, filter bar, sort select, hide-when*
   seo/         # JsonLd + MetaTags
-  layout/      # header/footer/container
+  layout/      # header/footer/container (+ BlackMarketMode)
   botpress/    # SkippyWebchat
 
 lib/
@@ -292,6 +312,11 @@ lib/
   api/         # http helpers + client
   ai/          # prompts/recommend/search
   config/      # env + constants
+
+public/
+  data/
+    products.json
+    blackmarket.json
 ```
 
 ---

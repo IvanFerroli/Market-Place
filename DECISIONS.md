@@ -32,11 +32,13 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Contexto:** o desafio permite Next.js ou outras stacks; também exige endpoints de API e páginas.
 
 **Motivo (por que):**
+
 - Permite **UI + API no mesmo repo** com rotas bem definidas (sem “colar” servidor separado).
 - Facilita **SSR/SEO básico** e rotas de produto com deep link real.
 - Melhor experiência para avaliação: menos setup externo e deploy naturalmente simples.
 
 **Evidência no projeto:**
+
 - `app/(shop)/page.tsx`
 - `app/(shop)/product/[id]/page.tsx`
 - `app/api/products/...`
@@ -52,11 +54,13 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Contexto:** o enunciado exige a API ler `products.json` e expor `GET /products` e `GET /products/:id`.
 
 **Motivo:**
+
 - Fonte de dados local e determinística (bom para avaliador rodar).
 - Mantém o contrato do desafio e reduz acoplamento com backends externos (Express/Nest/Fastify).
 - Permite “hardening” por ambiente (ex.: fallback para `/api` em setups onde `/products` é proxy/rewrite).
 
 **Evidência:**
+
 - Implementação base: `app/api/products/route.ts` e `app/api/products/[id]/route.ts`
 - Dados: `public/data/products.json`
 
@@ -67,6 +71,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 ### TD-003 — Camadas e separação de responsabilidades (Domínio → Dados → Estado → UI)
 
 **Decisão:** organizar o projeto em camadas previsíveis:
+
 - **Domain:** tipos/guards e invariantes (`lib/domain/*`)
 - **Data:** leitura/parsing de `products.json` (`lib/data/*`)
 - **API client:** HTTP e cliente (`lib/api/*`)
@@ -74,6 +79,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 - **UI:** componentes (`components/*`)
 
 **Motivo:**
+
 - Evita acoplamento (UI não “vira” regra de negócio).
 - Facilita testes e refactors (ex.: trocar drawer por overlay sem quebrar o core do carrinho).
 
@@ -86,6 +92,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Decisão:** representar preço/total em **centavos** com helpers centralizados (`Money`).
 
 **Motivo:**
+
 - Evita bugs clássicos de ponto flutuante.
 - Centraliza formatação e cálculos, garantindo total correto no carrinho.
 
@@ -98,12 +105,14 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 ### TD-005 — Carrinho como “core testável” (store + regras + persistência)
 
 **Decisão:** implementar carrinho com:
+
 - **regras** (`computeCartTotals`, etc.)
 - **store** (ações pequenas e previsíveis)
 - **selectors** (derivações)
 - **persist** (localStorage isolado)
 
 **Motivo:**
+
 - Carrinho é parte central do desafio; precisava ser **correto e robusto**.
 - Estrutura facilita troca de UI e cobre casos de borda (qty, remove, total).
 
@@ -114,6 +123,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 ### TD-006 — UI componentizada por domínio (Products / Cart / Search / Layout / UI kit)
 
 **Decisão:** separar componentes por “domínio de tela”:
+
 - `components/products/*` (card, grid, carousel, quick view)
 - `components/cart/*` (badge, item row, qty stepper, summary, overlay provider)
 - `components/search/*` (filtros, busca, sort)
@@ -121,6 +131,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 - `components/ui/*` (Button, Input, Modal, ToastProvider etc.)
 
 **Motivo:**
+
 - Maximiza reuso e clareza para avaliação (organização/componentização).
 - Evita “componentes deus” e reduz acoplamento.
 
@@ -135,12 +146,14 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Contexto:** o desafio pede “minicarrinho (drawer/sidebar)”, abrindo pelo ícone do header, com lista, qty, remoção e total em tempo real.
 
 **Motivo (por que foi feito):**
+
 - **Equivalência funcional:** minicarrinho “fora do fluxo”, aberto pelo header, com as operações exigidas.
 - **Melhoria de UX:** reduz troca de contexto (usuário continua navegando/filtrando).
 - **Consistência:** quick view e carrinho compartilham o mesmo sistema de overlay.
 - **Prova de esforço (não atalho):** exige infra de provider/eventos e cuidado de interação.
 
 **Evidência:**
+
 - `components/cart/MiniCartToast.tsx`
 - `components/cart/MiniCartToastProvider.tsx`
 - `components/products/ProductQuickViewToast*.tsx`
@@ -155,6 +168,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Decisão:** usar `app/(shop)/product/[id]/page.tsx` (rota explícita) para detalhe do produto.
 
 **Motivo:**
+
 - Mais autoexplicativa para leitura rápida do avaliador do que uma rota curta tipo `/p/[id]`.
 - Mantém deep link e página completa (quick view é enhancement, não substituto).
 
@@ -169,6 +183,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Decisão:** implementar barra de busca, filtros e sort como camada separada do grid de produtos.
 
 **Motivo:**
+
 - Diferencial valorizado e aumenta “cara de produto real”.
 - Reduz fricção de navegação e melhora demonstração do catálogo.
 
@@ -181,6 +196,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Decisão:** tratar padrões de interação (ex.: botões com `aria-label`, controle de overlay, foco/fechamento) como parte do “done”.
 
 **Motivo:**
+
 - A11y é diferencial e também evita falhas comuns em UI (principalmente em overlays).
 
 **Evidência indireta:** presença de `components/ui/Modal.tsx`, `ToastProvider.tsx` e o racional de “polimento” descrito no relatório.
@@ -192,6 +208,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Decisão:** cobrir regras e UI crítica com testes unitários e adicionar E2E para fluxo do carrinho.
 
 **Motivo:**
+
 - Carrinho e API são o coração funcional; testes reduzem risco e elevam a entrega.
 - Diferencial explícito do desafio.
 
@@ -204,6 +221,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Decisão:** gerar documentação de módulos/funções/types com TypeDoc.
 
 **Motivo:**
+
 - Aumenta clareza técnica e dá “prova navegável” da arquitetura.
 - Ajuda o avaliador a entender rapidamente o core (`lib/cart`, `lib/api`, `lib/domain`).
 
@@ -216,6 +234,7 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Decisão:** criar um bootstrap de desenvolvimento que automatiza setup, inicialização, docs e validações.
 
 **Motivo:**
+
 - Reduz “tribal knowledge” e o atrito de avaliação (clone → rodar → validar).
 - Demonstra maturidade de engenharia além do “só funciona na minha máquina”.
 
@@ -228,10 +247,39 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 **Decisão:** encapsular integração de chatbot (ex.: Botpress) em componente próprio para não contaminar o core do e-commerce.
 
 **Motivo:**
+
 - IA é diferencial; porém não pode aumentar risco do fluxo principal.
 - Mantém o projeto “avaliável” mesmo sem configurar o bot.
 
 **Evidência:** `components/botpress/SkippyWebchat.tsx` e `lib/ai/*` (prompts/recommend/search).
+
+---
+
+### TD-015 — BlackMarket mode (opcional): feature flag isolada + swap de dataset + variação visual
+
+**Decisão:** adicionar um modo opcional (“BlackMarket”) que ativa um **catálogo alternativo** e uma **variação visual** mais dark, de forma **isolada** (sem contaminar o core do carrinho/API).
+
+**Contexto:** não é requisito do desafio, mas serve como demonstração de maturidade de UI/state sem aumentar risco do fluxo principal.
+
+**Motivo:**
+
+- Demonstra **isolamento de feature** (toggle/controle em camada de layout, sem “espalhar ifs” pelo projeto).
+- Exercita **troca segura de dataset** (catálogo alternativo) mantendo tipagem, parsing e regras intactas.
+- Reforça identidade visual do tema (_Curated Cyberware_) sem afetar requisitos.
+
+**Non-goal (importante):**
+
+- Não é “decisão de arquitetura” do core; é **flavor** intencional, fácil de remover sem quebrar o projeto.
+- Não altera regras do carrinho — o carrinho continua sendo a truth-source (`lib/cart/*`).
+
+**Evidência:**
+
+- Toggle/layout: `components/layout/BlackMarketMode.tsx`
+- Dataset alternativo: `public/data/blackmarket.json`
+- Seleção de dataset/leitura: `lib/data/productsStore.ts` e `lib/data/readProductsJson.ts`
+- Consumo na UI: `app/(shop)/page.tsx` e `app/(shop)/product/[id]/page.tsx`
+
+**Trade-off:** adiciona superfície extra de UI/dados; mitigado por isolamento (não toca no core do carrinho).
 
 ---
 
@@ -252,6 +300,8 @@ Essa ordem é intencional: primeiro “**funciona e cumpre**”; depois “**fic
 - Página produto: `app/(shop)/product/[id]/page.tsx`
 - Carrinho UI: `components/cart/*`
 - Core do carrinho: `lib/cart/*`
+- Search/Filters: `components/search/*`
+- BlackMarket mode (opcional): `components/layout/BlackMarketMode.tsx` + `public/data/blackmarket.json`
 - Testes unit: `tests/unit/*` | E2E: `tests/e2e/cart-flow.spec.ts`
 - TypeDoc: `docs/typedoc/index.html`
 - DX script: `scripts/dx.mjs`
