@@ -18,6 +18,11 @@ const TYPEDOC_INDEX = path.join(ROOT, "docs", "typedoc", "index.html");
 const COVERAGE_INDEX = path.join(ROOT, "coverage", "lcov-report", "index.html");
 
 const APP_URL = process.env.DX_APP_URL ?? "http://localhost:3000";
+
+// abre o deploy também (por padrão ON)
+const DEPLOY_URL = process.env.DX_DEPLOY_URL ?? "https://ncart.vercel.app";
+const OPEN_DEPLOY = (process.env.DX_OPEN_DEPLOY ?? "1") !== "0";
+
 const OPEN_UI = (process.env.DX_OPEN_UI ?? "1") !== "0"; // 1 = abre navegador
 const RUN_TESTS = (process.env.DX_SKIP_TESTS ?? "0") !== "1";
 
@@ -276,6 +281,12 @@ async function startDevServer() {
   } else {
     console.warn(`Aviso: não consegui confirmar app em ${APP_URL} a tempo.`);
     console.warn("Se o Next subiu em outra porta, abre pelo log do terminal.");
+  }
+
+  if (OPEN_DEPLOY) {
+    banner("Abrindo deploy público");
+    tryOpen(DEPLOY_URL);
+    console.log(`Deploy: ${DEPLOY_URL}`);
   }
 
   return child;
