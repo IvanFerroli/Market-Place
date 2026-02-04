@@ -11,11 +11,13 @@ function normSource(source?: string) {
   return s || "default";
 }
 
-async function tryReadUtf8(p: string) {
+async function tryReadUtf8(
+  p: string,
+): Promise<{ raw: string | null; err: unknown | null }> {
   try {
-    return await readFile(p, "utf-8");
-  } catch {
-    return null;
+    return { raw: await readFile(p, "utf-8"), err: null };
+  } catch (err) {
+    return { raw: null, err };
   }
 }
 
@@ -77,13 +79,27 @@ export async function readProductsJson(source?: string): Promise<Product[]> {
 
   // 1) tenta FS (bom pra local/dev e build)
   let raw: string | null = null;
+  let lastErr: unknown | null = null;
+
   for (const p of candidates) {
-    raw = await tryReadUtf8(p);
-    if (raw) break;
+    const out = await tryReadUtf8(p);
+    if (out.raw != null) {
+      raw = out.raw;
+      break;
+    }
+    lastErr = out.err;
   }
 
-  // 2) fallback Vercel-safe real: importa o JSON no bundle (sem depender de host/FS/public)
+  // 2) fallback Vercel-safe real (SÓ no Vercel): importa o JSON no bundle
   if (raw == null) {
+    const isVercel = process.env.VERCEL === "1";
+
+    if (!isVercel) {
+      throw new Error(
+        `Unable to read ${filename}. Tried: ${candidates.join(", ")}. Last error: ${String(lastErr)}`,
+      );
+    }
+
     try {
       if (key === "blackmarket") {
         const mod =
