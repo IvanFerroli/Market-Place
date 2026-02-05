@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Container from "@/components/layout/Container";
+import type { Product } from "@/lib/domain/Product";
 
 function norm(v: string | null) {
   return (v ?? "").trim();
@@ -26,6 +26,46 @@ export default function FilterBar({ categories = [] }: { categories?: string[] }
 
   const urlSource = norm(sp.get("source")).toLowerCase();
   const isBlackmarket = urlSource === "blackmarket";
+
+  const [autoCategories, setAutoCategories] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    if (!isBlackmarket) {
+      setAutoCategories(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/products?source=blackmarket", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json = (await res.json()) as unknown;
+
+        // aceita tanto [products] quanto { products: [...] }
+        const arr: Product[] = Array.isArray(json)
+          ? (json as Product[])
+          : (((json as any)?.products as Product[]) ?? []);
+
+        const cats = Array.from(
+          new Set(arr.map((p) => String(p.category ?? "").trim()).filter(Boolean)),
+        ).sort((a, b) => a.localeCompare(b));
+
+        if (!cancelled) setAutoCategories(cats);
+      } catch {
+        if (!cancelled) setAutoCategories([]);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isBlackmarket]);
 
   const [category, setCategory] = useState(urlCategory);
   const [sort, setSort] = useState(urlSort);
@@ -119,6 +159,14 @@ export default function FilterBar({ categories = [] }: { categories?: string[] }
     }
   }, [openParam, render]);
 
+  const effectiveCategories = useMemo(() => {
+    const base = isBlackmarket ? (autoCategories ?? []) : categories;
+
+    return Array.from(new Set(base.map((c) => c.trim()).filter(Boolean))).sort((a, b) =>
+      a.localeCompare(b),
+    );
+  }, [isBlackmarket, autoCategories, categories]);
+
   if (!render) return null;
 
   return (
@@ -149,13 +197,11 @@ export default function FilterBar({ categories = [] }: { categories?: string[] }
             className="rounded-lg border px-3 py-2 text-sm"
           >
             <option value="">All</option>
-            {Array.from(new Set(categories.map((c) => c.trim()).filter(Boolean)))
-              .sort((a, b) => a.localeCompare(b))
-              .map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
+            {effectiveCategories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
 
