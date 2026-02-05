@@ -50,7 +50,13 @@ export default function FilterBar({ categories = [] }: { categories?: string[] }
         // aceita tanto [products] quanto { products: [...] }
         const arr: Product[] = Array.isArray(json)
           ? (json as Product[])
-          : (((json as any)?.products as Product[]) ?? []);
+          : (() => {
+              if (typeof json === "object" && json !== null && "products" in json) {
+                const maybe = (json as Record<string, unknown>).products;
+                return Array.isArray(maybe) ? (maybe as Product[]) : [];
+              }
+              return [];
+            })();
 
         const cats = Array.from(
           new Set(arr.map((p) => String(p.category ?? "").trim()).filter(Boolean)),
